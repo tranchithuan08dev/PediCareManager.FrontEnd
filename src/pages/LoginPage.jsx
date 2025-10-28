@@ -6,23 +6,27 @@ import {
     UserOutlined, LockOutlined, GlobalOutlined, SolutionOutlined 
 } from '@ant-design/icons';
 import 'antd/dist/reset.css'; 
+import { useDispatch } from 'react-redux';
+import { fetchLogin } from '../store/authSlice';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
-// ⭐️ Giả lập logic đăng nhập
-const onFinish = (values) => {
-    console.log('Thông tin đăng nhập:', values);
-    
-    // Giả lập thành công: admin/123
-    if (values.username === 'admin' && values.password === '123') {
-        message.success('Đăng nhập thành công! Chào mừng đến với hệ thống Nhi Khoa.');
-    } else {
-        message.error('Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng thử lại.');
-    }
-};
+
 
 const LoginPage = () => {
+    const dispatch = useDispatch();
+const [messageApi, contextHolder] = message.useMessage();
+
+  const onFinish = (values) => {
+    dispatch(fetchLogin(values)).then((res) => {
+      if (res.payload.ok) {
+        messageApi.success('Đăng nhập thành công!');
+      } else {
+        messageApi.error('Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu.');
+      }
+    });
+  };
     
     // ⭐️ CONTAINER STYLE: Đảm bảo căn giữa tuyệt đối
     const containerStyle = {
@@ -59,6 +63,7 @@ const LoginPage = () => {
 
     return (
         <Layout style={containerStyle}>
+             {contextHolder}
             {/* Thẻ Content đã được flexbox của Layout căn giữa */}
             <Content> 
                 <Card style={cardStyle} bordered={false}>
