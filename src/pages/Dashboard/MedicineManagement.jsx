@@ -7,67 +7,22 @@ import {
     Space, 
     Tag, 
     Card,
-    Descriptions // Import Descriptions để hiển thị chi tiết
+    Descriptions,
+    Input // ⭐️ IMPORT THÊM INPUT
 } from 'antd';
-import { EyeOutlined } from '@ant-design/icons';
+import { EyeOutlined, SearchOutlined } from '@ant-design/icons'; // ⭐️ IMPORT THÊM ICON
 import 'antd/dist/reset.css'; 
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGetAllMedicine, fetchGetDetailMedicine } from '../../store/medicineSlice';
 
 const { Title, Text } = Typography;
 
-// 1. DỮ LIỆU MẪU (Sử dụng dữ liệu bạn cung cấp)
-const initialData = [
-    {
-        "id": 1,
-        "medicineName": "Paracetamol 500mg",
-        "category": "Thuốc giảm đau hạ sốt",
-        "unit": "Viên",
-        "quantityInStock": 150,
-        "priceSell": 1000.00,
-        "expiryDate": "2026-06-30"
-    },
-    {
-        "id": 2,
-        "medicineName": "Vitamin C 100mg",
-        "category": "Vitamin & Khoáng chất",
-        "unit": "Chai 100 viên nén",
-        "quantityInStock": 1697,
-        "priceSell": 1500.00,
-        "expiryDate": "2025-10-27"
-    },
-    // Thêm một số thuốc khác để minh họa
-    {
-        "id": 3,
-        "medicineName": "Amoxicillin 250mg",
-        "category": "Thuốc kháng sinh",
-        "unit": "Hộp 10 vỉ",
-        "quantityInStock": 320,
-        "priceSell": 5500.00,
-        "expiryDate": "2027-01-15"
-    }
-];
-
-// 2. DỮ LIỆU CHI TIẾT MẪU (Dữ liệu đầy đủ hơn khi xem chi tiết)
-// Trong một ứng dụng thực tế, bạn sẽ gọi API để lấy dữ liệu này dựa trên 'id'
-const detailDataExample = {
-    "id": 1,
-    "medicineName": "Paracetamol 500mg",
-    "category": "Thuốc giảm đau hạ sốt",
-    "unit": "Viên",
-    "quantityInStock": 150,
-    "priceImport": 450.00, // Chi tiết bổ sung
-    "priceSell": 1000.00,
-    "expiryDate": "2026-06-30",
-    "supplier": "Công ty Dược Hậu Giang", // Chi tiết bổ sung
-    "createdAt": "2025-10-27T04:01:50.8939734" // Chi tiết bổ sung
-};
-
-
 const MedicineManagement = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedMedicine, setSelectedMedicine] = useState(null);
-    const initialData = useSelector((state)=> state?.MEDICINE?.listMedicine)
+    const [searchText, setSearchText] = useState(''); 
+
+    const initialData = useSelector((state)=> state?.MEDICINE?.listMedicine) || []; 
     const detailMedicine = useSelector((state) => state?.MEDICINE?.medicineDetail)
     console.log("detail", detailMedicine);
     
@@ -77,28 +32,33 @@ const MedicineManagement = () => {
     },[dispatch])
 
 
-    // Xử lý khi người dùng nhấn nút "Xem Chi tiết"
-  const handleViewDetail = (record) => {
-    dispatch(fetchGetDetailMedicine(record.id))
-        .then((response) => {
-            if (response.meta.requestStatus === 'fulfilled' && response.payload) {
-                
-                setSelectedMedicine(response.payload); 
-                
-               
-                setIsModalVisible(true);
-            } else {
-              
-                console.error("Lỗi khi lấy chi tiết thuốc:", response.error.message);
-              
-            }
-        })
-        .catch((error) => {
-             console.error("Lỗi mạng:", error);
-        });
-};
+    const filteredData = initialData.filter(item => {
+        if (searchText === '') {
+            return true;
+        }
+        return item.medicineName.toLowerCase().includes(searchText.toLowerCase());
+    });
 
-    // Định nghĩa cấu trúc cột cho Ant Design Table
+    const handleViewDetail = (record) => {
+        dispatch(fetchGetDetailMedicine(record.id))
+            .then((response) => {
+                if (response.meta.requestStatus === 'fulfilled' && response.payload) {
+                    
+                    setSelectedMedicine(response.payload); 
+                    
+                    
+                    setIsModalVisible(true);
+                } else {
+                  
+                    console.error("Lỗi khi lấy chi tiết thuốc:", response.error.message);
+                  
+                }
+            })
+            .catch((error) => {
+                 console.error("Lỗi mạng:", error);
+            });
+    };
+
     const columns = [
         {
             title: 'ID',
@@ -110,7 +70,6 @@ const MedicineManagement = () => {
             title: 'Tên Thuốc',
             dataIndex: 'medicineName',
             key: 'medicineName',
-            // Tạo liên kết hoặc style nổi bật cho tên
             render: (text) => <Text strong>{text}</Text>, 
         },
         {
@@ -131,7 +90,6 @@ const MedicineManagement = () => {
             key: 'quantityInStock',
             width: 100,
             align: 'right',
-            // Sử dụng Tag để highlight
             render: (quantity) => (
                 <Tag color={quantity < 200 ? 'volcano' : 'green'}>
                     {quantity}
@@ -169,17 +127,15 @@ const MedicineManagement = () => {
         },
     ];
 
-    // Component Modal để hiển thị chi tiết
     const DetailModal = () => (
         <Modal
             title={<Title level={4}>Thông Tin Chi Tiết Thuốc: {selectedMedicine?.medicineName}</Title>}
             open={isModalVisible}
             onCancel={() => setIsModalVisible(false)}
-            footer={null} // Không cần footer
+            footer={null} 
             width={700}
         >
-            {selectedMedicine ? (
-                // Descriptions: Ant Design Component giúp hiển thị chi tiết theo dạng key-value
+             {selectedMedicine ? (
                 <Descriptions bordered column={2} size="middle">
                     <Descriptions.Item label="ID">{selectedMedicine.id}</Descriptions.Item>
                     <Descriptions.Item label="Danh Mục"><Tag color="blue">{selectedMedicine.category}</Tag></Descriptions.Item>
@@ -222,14 +178,25 @@ const MedicineManagement = () => {
 
     return (
         <Card title="Danh Sách Thuốc " style={{ margin: '20px' }}>
+            
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+                <Input
+                    placeholder="Tìm kiếm theo Tên Thuốc..."
+                    prefix={<SearchOutlined />}
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    style={{ width: 300 }}
+                    allowClear
+                />
+            </div>
+
             <Table 
                 columns={columns} 
-                dataSource={initialData} 
+                dataSource={filteredData} 
                 rowKey="id" 
                 pagination={{ pageSize: 5 }} 
             />
             
-            {/* Component Modal */}
             <DetailModal />
         </Card>
     );
