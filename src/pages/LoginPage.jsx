@@ -33,21 +33,15 @@ const navigate = useNavigate();
     });
   };
     
-    // ⭐️ CONTAINER STYLE: Đảm bảo căn giữa tuyệt đối
     const containerStyle = {
         minHeight: '100vh', 
-        // Background gradient màu xanh dương nhẹ nhàng
         backgroundImage: 'url("https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg")',
-        backgroundSize: 'cover',        // ảnh phủ kín toàn màn hình
-        // căn giữa ảnh
+        backgroundSize: 'cover',   
         backgroundRepeat: 'no-repeat',
-        
-        // CĂN GIỮA NỘI DUNG THEO CHIỀU NGANG VÀ DỌC
         display: 'flex',
         justifyContent: 'center', 
         alignItems: 'center', 
-        
-        padding: '20px', // Đảm bảo có khoảng đệm nếu màn hình quá nhỏ
+        padding: '20px', 
     };
 
     const cardStyle = {
@@ -56,7 +50,6 @@ const navigate = useNavigate();
         borderRadius: '16px', 
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
-        // Đã bỏ marginTop '70px' để căn giữa tốt hơn với flexbox
     };
 
     const headerStyle = {
@@ -129,10 +122,7 @@ const navigate = useNavigate();
                                 </Text>
                             </Link>
                         </div>
-                        {/* ⭐️ KẾT THÚC THÊM LINK QUÊN MẬT KHẨU ⭐️ */}
-
-
-                        {/* Button Đăng Nhập */}
+                    
                         <Form.Item style={{ marginTop: '10px', marginBottom: '10px' }}>
                             <Button 
                                 type="primary" 
