@@ -8,10 +8,9 @@ import {
     Tag, 
     Card,
     Descriptions,
-    Row, // Dùng để định dạng trong Descriptions
-    Col, // Dùng để định dạng trong Descriptions
+    Input 
 } from 'antd';
-import { EyeOutlined, UserOutlined, PhoneOutlined, HomeOutlined } from '@ant-design/icons';
+import { EyeOutlined, UserOutlined, PhoneOutlined, HomeOutlined, SearchOutlined } from '@ant-design/icons'; 
 import 'antd/dist/reset.css'; 
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGetAllPatient, fetchGetDetailPatient } from '../../store/patientSlice';
@@ -21,13 +20,24 @@ const { Title, Text } = Typography;
 const PatientManagement = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState(null);
-      const initialPatientData = useSelector((state)=> state?.PATIENT?.listPatient) || []; 
-    const detailMedicine = useSelector((state) => state?.PATIENT?.patientDetail)
- const dispatch = useDispatch();
+    
+    const [searchText, setSearchText] = useState(''); 
+    
+    const initialPatientData = useSelector((state)=> state?.PATIENT?.listPatient) || []; 
+    // const detailMedicine = useSelector((state) => state?.PATIENT?.patientDetail) 
+    const dispatch = useDispatch();
     useEffect(()=>{
         dispatch(fetchGetAllPatient())
     },[dispatch])
-    // Hàm tiện ích tính tuổi
+
+    const filteredData = initialPatientData.filter(item => {
+        if (searchText === '') {
+            return true;
+        }
+        return item.fullName.toLowerCase().includes(searchText.toLowerCase());
+    });
+
+
     const calculateAge = (dob) => {
         if (!dob) return 'N/A';
         const today = new Date();
@@ -39,26 +49,20 @@ const PatientManagement = () => {
         }
         return age;
     };
-
-    // Xử lý khi người dùng nhấn nút "Xem Chi tiết"
     const handleViewDetail = (record) => {
-         dispatch(fetchGetDetailPatient(record.id))
-                    .then((response) => {
-                        if (response.meta.requestStatus === 'fulfilled' && response.payload) {
-                            setSelectedPatient(response.payload); 
-                            setIsModalVisible(true);
-                        } else {
-                          
-                            console.error("Lỗi khi lấy chi tiết bệnh nhân: ", response.error.message);
-                          
-                        }
-                    })
-                    .catch((error) => {
-                         console.error("Lỗi mạng:", error);
-                    });
+        dispatch(fetchGetDetailPatient(record.id))
+            .then((response) => {
+                if (response.meta.requestStatus === 'fulfilled' && response.payload) {
+                    setSelectedPatient(response.payload); 
+                    setIsModalVisible(true);
+                } else {
+                    console.error("Lỗi khi lấy chi tiết bệnh nhân: ", response.error.message);
+                }
+            })
+            .catch((error) => {
+                 console.error("Lỗi mạng:", error);
+            });
     };
-
-    // Định nghĩa cấu trúc cột cho Ant Design Table
     const columns = [
         {
             title: 'Mã BN',
@@ -102,7 +106,7 @@ const PatientManagement = () => {
             title: 'Địa Chỉ',
             dataIndex: 'address',
             key: 'address',
-            ellipsis: true, // Thêm dấu ba chấm nếu quá dài
+            ellipsis: true, 
         },
         {
             title: 'Người Đại Diện',
@@ -127,28 +131,24 @@ const PatientManagement = () => {
         },
     ];
 
-    // Component Modal để hiển thị chi tiết
     const DetailModal = () => (
         <Modal
             title={<Title level={4}><UserOutlined /> Hồ Sơ Bệnh Nhân: {selectedPatient?.fullName}</Title>}
             open={isModalVisible}
             onCancel={() => setIsModalVisible(false)}
-            footer={null} // Không cần footer
+            footer={null} 
             width={750}
         >
             {selectedPatient ? (
-                // Descriptions: Ant Design Component giúp hiển thị chi tiết theo dạng key-value
                 <Descriptions bordered column={2} size="middle" layout="vertical">
                     
-                    {/* Hàng 1: Mã BN và Tên */}
                     <Descriptions.Item label="Mã Bệnh Nhân" span={1}>
                         <Text strong copyable>{selectedPatient.patientCode || 'Chưa có mã'}</Text>
                     </Descriptions.Item>
-                     <Descriptions.Item label="Họ và Tên" span={1}>
+                    <Descriptions.Item label="Họ và Tên" span={1}>
                         <Text style={{ fontSize: '1.1em', color: '#1890ff' }} strong>{selectedPatient.fullName}</Text>
                     </Descriptions.Item>
 
-                    {/* Hàng 2: Ngày sinh, Giới tính, Tuổi */}
                     <Descriptions.Item label="Ngày Sinh">
                         {selectedPatient.dateOfBirth || 'Chưa rõ'}
                     </Descriptions.Item>
@@ -165,7 +165,6 @@ const PatientManagement = () => {
                     </Descriptions.Item>
 
 
-                    {/* Hàng 3: Liên hệ */}
                     <Descriptions.Item label="Điện Thoại Người Đại Diện">
                         <Space>
                             <PhoneOutlined /> <Text copyable>{selectedPatient.representativePhone}</Text>
@@ -175,7 +174,6 @@ const PatientManagement = () => {
                         {selectedPatient.representativeName}
                     </Descriptions.Item>
                     
-                    {/* Hàng 4: Địa chỉ */}
                     <Descriptions.Item label="Địa Chỉ Thường Trú" span={2}>
                         <HomeOutlined style={{ marginRight: 8 }} />
                         <Text italic>{selectedPatient.address}</Text>
@@ -194,14 +192,25 @@ const PatientManagement = () => {
 
     return (
         <Card title="Danh Sách Bệnh Nhân" style={{ margin: '20px' }}>
+            
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+                <Input
+                    placeholder="Tìm kiếm theo Họ và Tên Bệnh Nhân..."
+                    prefix={<SearchOutlined />}
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    style={{ width: 300 }}
+                    allowClear
+                />
+            </div>
+
             <Table 
                 columns={columns} 
-                dataSource={initialPatientData} 
+                dataSource={filteredData} 
                 rowKey="id" 
                 pagination={{ pageSize: 7 }} 
             />
             
-            {/* Component Modal */}
             <DetailModal />
         </Card>
     );

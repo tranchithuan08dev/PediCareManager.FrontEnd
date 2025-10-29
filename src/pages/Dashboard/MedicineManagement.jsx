@@ -194,7 +194,7 @@ const MedicineManagement = () => {
                 columns={columns} 
                 dataSource={filteredData} 
                 rowKey="id" 
-                pagination={{ pageSize: 5 }} 
+                pagination={{ pageSize: 7 }} 
             />
             
             <DetailModal />
