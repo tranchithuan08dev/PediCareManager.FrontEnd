@@ -1,14 +1,20 @@
-
+import { Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
-import PatientRecordDisplay from './pages/PatientRecordDisplay'
-import ProcessExaminationPage from './pages/ProcessExaminationPage'
+import ProcessExaminationPage from './pages/Dashboard/ProcessExaminationPage'
+import DoctorDashboardLayout from './pages/Dashboard'
+import ForgetPasswordPage from './pages/ForgetPasswordPage'
 
 function App() {
-
   return (
-    <>
-    <LoginPage/>
-    </>
+    <Routes>
+      {/* Trang login */}
+      <Route path="/" element={<LoginPage />} />
+  <Route path="/forgot" element={<ForgetPasswordPage />} />
+      {/* Dashboard chính của bác sĩ */}
+      <Route path="/admin" element={<DoctorDashboardLayout />}>
+        <Route path="exam" element={<ProcessExaminationPage />} />
+      </Route>
+    </Routes>
   )
 }
 

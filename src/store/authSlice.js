@@ -5,6 +5,7 @@ const name = "auth";
 
 const initialState = {
     token: null,
+   
     
 };
 export const fetchLogin = createAsyncThunk(`${name}/fetchLogin`, async (params = {}) => {
@@ -24,6 +25,27 @@ export const fetchLogin = createAsyncThunk(`${name}/fetchLogin`, async (params =
             ok: false,
             message: 'Thông tin đăng nhập của bạn không đúng!'
         }
+    }
+});
+
+export const fetchSendEmail = createAsyncThunk(`${name}/fetchSendEmail`, async (params = {}) => {
+    try {
+        const res = await authService.sendEmail(params);
+       
+        return res;
+    } catch (error) {
+       
+    }
+});
+
+export const fetchResetPassword = createAsyncThunk(`${name}/fetchResetPassword`, async (params = {}) => {
+    try {
+        const res = await authService.resetPassword(params);
+       console.log("ressreset", res);
+       
+        return res;
+    } catch (error) {
+       
     }
 });
 
