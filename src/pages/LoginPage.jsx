@@ -8,6 +8,9 @@ import {
 import 'antd/dist/reset.css'; 
 import { useDispatch } from 'react-redux';
 import { fetchLogin } from '../store/authSlice';
+import { useNavigate } from 'react-router-dom';
+// ⭐️ IMPORT THÊM LINK NẾU CẦN ĐỂ TẠO LIÊN KẾT ĐIỀU HƯỚNG NỘI BỘ
+import { Link } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -17,11 +20,13 @@ const { Title, Text } = Typography;
 const LoginPage = () => {
     const dispatch = useDispatch();
 const [messageApi, contextHolder] = message.useMessage();
-
+const navigate = useNavigate();
   const onFinish = (values) => {
     dispatch(fetchLogin(values)).then((res) => {
-      if (res.payload.ok) {
+      // Giả định res.payload tồn tại và có thuộc tính ok
+      if (res.payload && res.payload.ok) {
         messageApi.success('Đăng nhập thành công!');
+        navigate('/admin');
       } else {
         messageApi.error('Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu.');
       }
@@ -32,9 +37,9 @@ const [messageApi, contextHolder] = message.useMessage();
     const containerStyle = {
         minHeight: '100vh', 
         // Background gradient màu xanh dương nhẹ nhàng
-       backgroundImage: 'url("https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg")',
-        backgroundSize: 'cover',      // ảnh phủ kín toàn màn hình
-     // căn giữa ảnh
+        backgroundImage: 'url("https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg")',
+        backgroundSize: 'cover',        // ảnh phủ kín toàn màn hình
+        // căn giữa ảnh
         backgroundRepeat: 'no-repeat',
         
         // CĂN GIỮA NỘI DUNG THEO CHIỀU NGANG VÀ DỌC
@@ -51,7 +56,7 @@ const [messageApi, contextHolder] = message.useMessage();
         borderRadius: '16px', 
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
-        marginTop: '70px'
+        // Đã bỏ marginTop '70px' để căn giữa tốt hơn với flexbox
     };
 
     const headerStyle = {
@@ -63,7 +68,7 @@ const [messageApi, contextHolder] = message.useMessage();
 
     return (
         <Layout style={containerStyle}>
-             {contextHolder}
+              {contextHolder}
             {/* Thẻ Content đã được flexbox của Layout căn giữa */}
             <Content> 
                 <Card style={cardStyle} bordered={false}>
@@ -99,6 +104,7 @@ const [messageApi, contextHolder] = message.useMessage();
                             <Input 
                                 placeholder="Tài khoản của bạn" 
                                 size="large"
+                                prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} // Thêm icon
                             />
                         </Form.Item>
 
@@ -110,11 +116,24 @@ const [messageApi, contextHolder] = message.useMessage();
                             <Input.Password
                                 placeholder="Mật khẩu"
                                 size="large"
+                                prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} // Thêm icon
                             />
                         </Form.Item>
 
+                        {/* ⭐️ THÊM LINK QUÊN MẬT KHẨU TẠI ĐÂY ⭐️ */}
+                        <div style={{ textAlign: 'right', marginBottom: '15px', marginTop: '-10px' }}>
+                            {/* Sử dụng component Link từ react-router-dom để điều hướng */}
+                            <Link to="/forgot-password">
+                                <Text type="secondary" style={{ color: accentColor, fontWeight: '500' }}>
+                                    Quên mật khẩu?
+                                </Text>
+                            </Link>
+                        </div>
+                        {/* ⭐️ KẾT THÚC THÊM LINK QUÊN MẬT KHẨU ⭐️ */}
+
+
                         {/* Button Đăng Nhập */}
-                        <Form.Item style={{ marginTop: '30px', marginBottom: '10px' }}>
+                        <Form.Item style={{ marginTop: '10px', marginBottom: '10px' }}>
                             <Button 
                                 type="primary" 
                                 htmlType="submit" 
