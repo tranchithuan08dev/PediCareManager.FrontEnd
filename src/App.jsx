@@ -3,6 +3,7 @@ import LoginPage from './pages/LoginPage'
 import ProcessExaminationPage from './pages/Dashboard/ProcessExaminationPage'
 import DoctorDashboardLayout from './pages/Dashboard'
 import ForgetPasswordPage from './pages/ForgetPasswordPage'
+import MedicineManagement from './pages/Dashboard/MedicineManagement'
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
       <Route index element={<Navigate to="examination" replace />} />
       
       <Route path="examination" element={<ProcessExaminationPage />} />
+       <Route path="medicine" element={<MedicineManagement />} />
+      
     </Route>
     </Routes>
   )

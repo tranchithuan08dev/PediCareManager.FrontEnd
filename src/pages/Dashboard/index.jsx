@@ -39,7 +39,7 @@ const menuItems = [
         key: 'inventory',
         icon: <MedicineBoxOutlined />,
         label: 'Kho Thuốc',
-        path: '/inventory',
+        path: '/admin/medicine',
     },
     {
         key: 'reports',

@@ -41,8 +41,6 @@ export const fetchSendEmail = createAsyncThunk(`${name}/fetchSendEmail`, async (
 export const fetchResetPassword = createAsyncThunk(`${name}/fetchResetPassword`, async (params = {}) => {
     try {
         const res = await authService.resetPassword(params);
-       console.log("ressreset", res);
-       
         return res;
     } catch (error) {
        
@@ -58,7 +56,7 @@ const authSlice = createSlice({
         builder.addCase(fetchLogin.fulfilled, (state, action) => {
             if (action.payload.ok) {
                 state.token = action.payload.data.token;
-              
+                localStorage.setItem("ACCESS_TOKEN", state.token);
             }
         });
       

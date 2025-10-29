@@ -9,7 +9,6 @@ import 'antd/dist/reset.css';
 import { useDispatch } from 'react-redux';
 import { fetchLogin } from '../store/authSlice';
 import { useNavigate } from 'react-router-dom';
-// ⭐️ IMPORT THÊM LINK NẾU CẦN ĐỂ TẠO LIÊN KẾT ĐIỀU HƯỚNG NỘI BỘ
 import { Link } from 'react-router-dom';
 
 const { Content } = Layout;
