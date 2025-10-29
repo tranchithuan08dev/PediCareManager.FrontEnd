@@ -37,7 +37,7 @@ export const fetchGetDetailMedicine = createAsyncThunk(`${name}/fetchGetDetailMe
 
 
 
-const authSlice = createSlice({
+const medicineSlice = createSlice({
     name,
     initialState,
     reducers: {},
@@ -52,4 +52,4 @@ const authSlice = createSlice({
     },
 })
 
-export default authSlice.reducer;
+export default medicineSlice.reducer;
