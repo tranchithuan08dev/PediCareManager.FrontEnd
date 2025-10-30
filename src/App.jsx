@@ -6,8 +6,15 @@ import ForgetPasswordPage from './pages/ForgetPasswordPage'
 import MedicineManagement from './pages/Dashboard/MedicineManagement'
 import PatientManagement from './pages/Dashboard/PatientManagement'
 import MedicalRecordManagement from './pages/Dashboard/MedicalRecordManagement'
+import { useDispatch } from 'react-redux'
+import { useEffect } from 'react'
+import { fetchMe } from './store/authSlice'
 
 function App() {
+  const dispatch = useDispatch();
+  useEffect(()=>{
+     dispatch(fetchMe())
+  },[])
   return (
     <Routes>
       {/* Trang login */}

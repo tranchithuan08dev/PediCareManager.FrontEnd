@@ -1,11 +1,11 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, current } from "@reduxjs/toolkit";
 import authService from "../services/authService";
 
 const name = "auth";
 
 const initialState = {
     token: null,
-   
+   currentuser:null,
     
 };
 export const fetchLogin = createAsyncThunk(`${name}/fetchLogin`, async (params = {}) => {
@@ -47,6 +47,17 @@ export const fetchResetPassword = createAsyncThunk(`${name}/fetchResetPassword`,
     }
 });
 
+export const fetchMe = createAsyncThunk(`${name}/fetchMe`, async () => {
+    try {
+        const res = await authService.getMe();
+        console.log("res cus", res);
+        
+        return res;
+    } catch (error) {
+       
+    }
+});
+
 
 const authSlice = createSlice({
     name,
@@ -59,7 +70,10 @@ const authSlice = createSlice({
                 localStorage.setItem("ACCESS_TOKEN", state.token);
             }
         });
+       builder.addCase(fetchMe.fulfilled, (state, action) => {
       
+                  state.currentuser = action.payload.data;
+              });
 
     },
 })

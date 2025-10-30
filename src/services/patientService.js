@@ -10,6 +10,9 @@ const patientService = {
     getHistory:function (patientCode) {
         return API.callWithToken().get(`Patients/history?patientCode=${patientCode}`);
     },
+    searchPatient: function (key) {
+        return API.callWithToken().get(`Patients/search?keyword=${key}`);
+    },
   
 }
 export default patientService;

@@ -1,10 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import medicineService from "../services/medicineService";
+import { mappingDataMedicineProcessExaminationPage } from "../helpers";
 
 const name = "medicine";
 
 const initialState = {
   listMedicine :[],
+   listMedicineProcessExamination :[],
   medicineDetail :{}
     
 };
@@ -19,6 +21,19 @@ export const fetchGetAllMedicine = createAsyncThunk(`${name}/fetchGetAllMedicine
         }
     }
 });
+
+export const fetchGetAllMedicineProcessExamination= createAsyncThunk(`${name}/fetchGetAllMedicineProcessExamination`, async () => {
+    try {
+        const res = await medicineService.getAll();
+        return res.data.map(mappingDataMedicineProcessExaminationPage);
+    } catch (error) {
+        return {
+            ok: false,
+            message: 'Lỗi xảy ra'
+        }
+    }
+});
+
 
 export const fetchGetDetailMedicine = createAsyncThunk(`${name}/fetchGetDetailMedicine`, async (id) => {
     try {
@@ -36,8 +51,6 @@ export const fetchGetDetailMedicine = createAsyncThunk(`${name}/fetchGetDetailMe
 export const fetchGetDetailMedicineRecords = createAsyncThunk(`${name}/fetchGetDetailMedicineRecords`, async (id) => {
     try {
         const res = await medicineService.getMedicalRecords(id);
-        console.log("ress", res);
-        
         return res.data;
     } catch (error) {
         return {
@@ -60,7 +73,9 @@ const medicineSlice = createSlice({
         builder.addCase(fetchGetDetailMedicine.fulfilled, (state, action) => {
             state.medicineDetail = action.payload.data;
         });
-
+       builder.addCase(fetchGetAllMedicineProcessExamination.fulfilled, (state, action) => {
+            state.listMedicineProcessExamination = action.payload;
+        });
     },
 })
 

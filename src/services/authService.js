@@ -8,7 +8,10 @@ const authService = {
         return API.call().post('Auth/forgot-password', data);
     },
     resetPassword:function (data) {
-        return API.call().post('Auth/forgot-password', data);
+        return API.call().post('Auth/reset-password', data);
+    },
+    getMe:function () {
+        return API.callWithToken().get('Auth/me');
     },
 }
 export default authService;

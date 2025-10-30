@@ -12,6 +12,10 @@ import {
 // Lưu ý: Trong môi trường thực tế, bạn chỉ cần import CSS một lần ở file gốc
 import 'antd/dist/reset.css'; 
 import moment from 'moment';
+import {  fetchGetAllMedicineProcessExamination } from '../../store/medicineSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchGetListPatientSearch, fetchGetPatientHistory } from '../../store/patientSlice';
+import { fetchPostExamination } from '../../store/examinationSlice';
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
@@ -19,65 +23,7 @@ const { Option } = Select;
 const { TextArea } = Input;
 const { Panel } = Collapse; 
 
-// --- Dữ liệu Giả định (CẬP NHẬT) ---
-const mockMedicines = [
-    { id: 1, name: 'Paracetamol 500mg', label: 'Paracetamol 500mg', category: "Thuốc giảm đau hạ sốt", unit: "Viên", quantityInStock: 150, priceSell: 1000.00, expiryDate: "2026-06-30" },
-    { id: 2, name: 'Vitamin C 100mg', label: 'Vitamin C 100mg', category: "Vitamin & Khoáng chất", unit: "Chai 100 viên nén", quantityInStock: 1697, priceSell: 1500.00, expiryDate: "2025-10-27" },
-    // Các mục cũ được cập nhật cấu trúc để đảm bảo tương thích
-    { id: 3, name: 'Alpha Choay', label: 'Alpha Choay', category: "Khác", unit: "Viên", quantityInStock: 50, priceSell: 800.00 },
-    { id: 4, name: 'Cetirizine 10mg', label: 'Cetirizine 10mg', category: "Kháng Histamin", unit: "Viên", quantityInStock: 200, priceSell: 500.00 },
-    { id: 6, name: 'Hapacol 650mg', label: 'Hapacol 650mg', category: "Thuốc giảm đau hạ sốt", unit: "Gói", quantityInStock: 100, priceSell: 1200.00 },
-];
 
-const mockPatients = [
-    { id: 15, patientCode: "BN-15", fullName: "CHI THUAN", dateOfBirth: "1995-05-20", gender: "Nam", address: "123 Nguyễn Trãi, Hà Nội",  phone: "0987654321", representativeName: "Nguyễn A", representativePhone: "0901111111" },
-    { id: 20, patientCode: "BN-20251027-001", fullName: "CHI THUAN", dateOfBirth: "1990-03-15", gender: "Nam", address: "123 Quận 1, TP.HCM", phone: "0912345678", representativeName: null, representativePhone: null},
-    { id: 25, patientCode: "BN-27-011761", fullName: "Nguyễn Văn Minh", dateOfBirth: "2000-08-01", gender: "Nam", address: "123 Hà Đông, Hà Nội",  phone: "0905123456", representativeName: "Trần B", representativePhone: "0902222222" },
-    { id: 28, patientCode: "BN-2222337-01345461", fullName: "Nguyễn Văn Minh", dateOfBirth: "1990-03-15", gender: "Nam", address: "123 Quận 1, TP.HCM",phone: "0905123456", representativeName: null, representativePhone: null},
-];
-
-const mockMedicalHistory = {
-    20: [
-        {
-            "medicalRecordId": 21,
-            "visitDate": "2025-10-28T04:38:25.4557212",
-            "doctorName": "BS. Nguyễn Văn A",
-            "symptoms": "Sốt nhẹ, ho khan kéo dài 3 ngày",
-            "diagnosis": "Viêm đường hô hấp trên",
-            "prescriptionItems": [
-                {
-                    "medicineName": "Paracetamol 500mg",
-                    "quantity": 14,
-                    "dosage": "500mg",
-                    "usageInstruction": "Uống 1 viên sau ăn, ngày 2 lần (Sáng/Tối)"
-                },
-                {
-                    "medicineName": "Hapacol 650mg",
-                    "quantity": 6,
-                    "dosage": "650mg",
-                    "usageInstruction": "Uống 1 viên khi sốt > 38.5°C"
-                }
-            ]
-        },
-    ],
-    25: [
-        {
-            "medicalRecordId": 22,
-            "visitDate": "2025-09-01T09:30:00.0000000",
-            "doctorName": "BS. Lê Thị B",
-            "symptoms": "Đau đầu, mất ngủ",
-            "diagnosis": "Thiếu máu não thoáng qua",
-            "prescriptionItems": [
-                {
-                    "medicineName": "Ginkgo Biloba",
-                    "quantity": 30,
-                    "dosage": "N/A",
-                    "usageInstruction": "Uống 1 viên/ngày sau ăn sáng"
-                }
-            ]
-        }
-    ]
-};
 
 const initialPatientData = {
     id: null,
@@ -215,7 +161,7 @@ const OldPrescriptionHistory = ({ history }) => {
         { title: 'Liều/Cách dùng', dataIndex: 'usageInstruction', key: 'usageInstruction', width: 300 },
     ];
 
-    const items = history
+    const items = [...history]
         .sort((a, b) => new Date(b.visitDate) - new Date(a.visitDate)) 
         .map((record, index) => ({
             key: record.medicalRecordId,
@@ -265,7 +211,8 @@ const OldPrescriptionHistory = ({ history }) => {
 const PatientExaminationForm = () => {
     const [form] = Form.useForm(); 
     const [medicineForm] = Form.useForm(); 
-    
+    const [searchKeyword, setSearchKeyword] = useState(null);
+     const [patientCodeKeyword, setPatientCodeKeyword] = useState(null);
     const [isNewPatientMode, setIsNewPatientMode] = useState(false);
     const [currentPatient, setCurrentPatient] = useState(initialPatientData);
     const [prescriptionItems, setPrescriptionItems] = useState([]);
@@ -273,20 +220,62 @@ const PatientExaminationForm = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [searchName, setSearchName] = useState("");
     const [medicalHistory, setMedicalHistory] = useState([]); 
+    const [messageApi, contextHolder] = message.useMessage();
+    // ⭐️ BỔ SUNG STATE FLAG: Theo dõi trạng thái tìm kiếm đã được khởi tạo
+    const [searchInitiated, setSearchInitiated] = useState(false); 
     
-    // ⭐️ STATE: Theo dõi mục đang được chỉnh sửa
+    //GỌI HÀM Ở ĐÂY
+    const mockMedicines = useSelector((state)=> state?.MEDICINE?.listMedicineProcessExamination) || []; 
+    const results = useSelector((state)=> state?.PATIENT?.listSearch) || []; 
+    const history = useSelector((state)=> state?.PATIENT?.patientHistory) || []; 
+     const currentUser = useSelector((state)=> state?.AUTH?.currentuser) || []; 
+     console.log("currentUser",currentUser);
+     
+    const dispatch = useDispatch();
+    
+    // 1. useEffect GỌI API (giữ nguyên logic gốc)
+    useEffect(()=>{
+        dispatch(fetchGetAllMedicineProcessExamination())
+        if (searchKeyword != null) {
+             dispatch(fetchGetListPatientSearch(searchKeyword))
+        }
+        if (patientCodeKeyword != null) {
+              dispatch(fetchGetPatientHistory(patientCodeKeyword))
+        }
+       
+    },[searchKeyword,dispatch,patientCodeKeyword])
+
+    
+    useEffect(() => {
+        if (searchInitiated) {
+            if (results.length > 0) {
+                setSearchResults(results);
+                setIsModalVisible(true); 
+            } else if (searchKeyword) {
+         
+                handleInputNewPatient(searchName);
+            }
+            setSearchInitiated(false); 
+        }
+    }, [results]); 
+
+    useEffect(() => {
+        if (patientCodeKeyword) {
+            setMedicalHistory(history);
+        }
+    }, [history, patientCodeKeyword, currentPatient.fullName]);
+    
     const [editingKey, setEditingKey] = useState(null); 
 
-    // --- Đồng bộ hóa Form và State khi chuyển chế độ (CẬP NHẬT) ---
     useEffect(() => {
         if (!isNewPatientMode) {
             form.setFieldsValue({
                 ...currentPatient,
                 dateOfBirth: currentPatient.dateOfBirth ? moment(currentPatient.dateOfBirth, 'YYYY-MM-DD') : null,
-                // Đảm bảo set các trường mới cho form Khám Lâm Sàng khi chuyển BN
-                bodyTemperature: 37.0, // Giá trị mặc định
-                bloodPressure: "120/80", // Giá trị mặc định
-                heartRate: 80, // Giá trị mặc định
+              
+                bodyTemperature: 37.0, 
+                bloodPressure: "120/80", 
+                heartRate: 80, 
                 symptoms: undefined,
                 clinicalFindings: undefined,
                 diagnosis: undefined,
@@ -313,31 +302,31 @@ const PatientExaminationForm = () => {
     
     // --- Logic Xử lý Bệnh nhân (Giữ nguyên) ---
 
+    // ⭐️ CHỈNH SỬA: handleSearch chỉ kích hoạt tìm kiếm và bật cờ
     const handleSearch = () => {
         const trimmed = searchName?.trim();
         if (!trimmed) {
-            message.warning("Vui lòng nhập Họ Tên hoặc một phần của tên để tìm kiếm.");
+            messageApi.warning("Vui lòng nhập Họ Tên hoặc một phần của tên để tìm kiếm.");
             return;
         }
 
         const lowerCaseName = trimmed.toLowerCase();
-        // Giả lập tìm kiếm theo tên, không tìm theo dị ứng
-        const results = mockPatients.filter(p => p.fullName.toLowerCase().includes(lowerCaseName));
 
-        if (results.length > 0) {
-            setSearchResults(results);
-            setIsModalVisible(true);
-        } else {
-            message.info(`Không tìm thấy bệnh nhân "${trimmed}". Chuyển sang chế độ nhập thông tin chi tiết.`);
-            handleInputNewPatient(trimmed); 
-        }
+        setSearchKeyword(lowerCaseName);
+        setSearchInitiated(true); // Bật cờ để lắng nghe kết quả ở useEffect [results]
+        
+        // **XÓA LOGIC CŨ**: Logic kiểm tra results.length đã chuyển sang useEffect [results]
     };
     
+    // ⭐️ CHỈNH SỬA: handleSelectPatient chỉ chọn bệnh nhân và kích hoạt load lịch sử
     const handleSelectPatient = (patient) => {
         const patientAgeAtVisit = calculateAge(patient.dateOfBirth);
+        console.log("patient",patient);
         
-        const history = mockMedicalHistory[patient.id] || [];
-        setMedicalHistory(history); 
+        // Kích hoạt load lịch sử
+        setPatientCodeKeyword(patient.patientCode) 
+        
+        // **XÓA LOGIC CŨ**: setMedicalHistory(history); 
         
         setCurrentPatient({
             ...patient,
@@ -353,7 +342,8 @@ const PatientExaminationForm = () => {
         setIsNewPatientMode(false); 
         setPrescriptionItems([]);
         setEditingKey(null); // Đảm bảo reset trạng thái chỉnh sửa
-        message.success(`Đã tải thông tin bệnh nhân ${patient.fullName}. (${history.length} lần khám trước đó)`);
+        
+        // **XÓA LOGIC CŨ**: message.success được chuyển sang useEffect [history]
     };
 
     const handleInputNewPatient = (name = "") => {
@@ -375,7 +365,7 @@ const PatientExaminationForm = () => {
             drugAllergy: undefined, // Reset dị ứng thuốc
         }); 
         
-        message.info('Vui lòng nhập đầy đủ thông tin chi tiết cho bệnh nhân mới.');
+        messageApi.info('Vui lòng nhập đầy đủ thông tin chi tiết cho bệnh nhân mới.');
     };
     
     // --- Logic Kê Đơn Thuốc (Giữ nguyên) ---
@@ -388,10 +378,10 @@ const PatientExaminationForm = () => {
         
         // **KHẮC PHỤC LỖI THÊM THUỐC**: Kiểm tra số lượng
         if (quantity <= 0) {
-             return message.error('Tổng Số Lượng (SL) phải lớn hơn 0!');
+             return messageApi.error('Tổng Số Lượng (SL) phải lớn hơn 0!');
         }
         if (totalDose > quantity) {
-            return message.error('Tổng liều lượng Sáng/Trưa/Chiều/Tối không được vượt quá Tổng Số Lượng!');
+            return messageApi.error('Tổng liều lượng Sáng/Trưa/Chiều/Tối không được vượt quá Tổng Số Lượng!');
         }
 
         const selectedMedicine = mockMedicines.find(m => m.id === medicineId);
@@ -420,13 +410,13 @@ const PatientExaminationForm = () => {
             
             setPrescriptionItems([...prescriptionItems, newItem]);
             medicineForm.resetFields();
-            message.success(`Đã thêm ${selectedMedicine.name} vào đơn.`);
+            messageApi.success(`Đã thêm ${selectedMedicine.name} vào đơn.`);
         }
     };
     
     const onDeleteMedicine = (key) => {
         setPrescriptionItems(prescriptionItems.filter(item => item.key !== key));
-        message.info("Đã xóa thuốc khỏi đơn.");
+        messageApi.info("Đã xóa thuốc khỏi đơn.");
     };
 
     // ⭐️ LOGIC BẮT ĐẦU CHỈNH SỬA
@@ -444,14 +434,14 @@ const PatientExaminationForm = () => {
             evening: record.evening || 0,
             note: record.note || "",
         });
-        message.info(`Đang chỉnh sửa thuốc: ${record.medicineName}`);
+        messageApi.info(`Đang chỉnh sửa thuốc: ${record.medicineName}`);
     };
 
     // ⭐️ LOGIC HỦY CHỈNH SỬA
     const onCancelEdit = () => {
         setEditingKey(null);
         medicineForm.resetFields();
-        message.info("Đã hủy chỉnh sửa.");
+        messageApi.info("Đã hủy chỉnh sửa.");
     };
 
     // ⭐️ LOGIC LƯU CHỈNH SỬA
@@ -460,10 +450,10 @@ const PatientExaminationForm = () => {
         const totalDose = (morning || 0) + (noon || 0) + (afternoon || 0) + (evening || 0);
         
         if (quantity <= 0) {
-             return message.error('Tổng Số Lượng (SL) phải lớn hơn 0!');
+             return messageApi.error('Tổng Số Lượng (SL) phải lớn hơn 0!');
         }
         if (totalDose > quantity) {
-            return message.error('Tổng liều lượng Sáng/Trưa/Chiều/Tối không được vượt quá Tổng Số Lượng!');
+            return messageApi.error('Tổng liều lượng Sáng/Trưa/Chiều/Tối không được vượt quá Tổng Số Lượng!');
         }
 
         const selectedMedicine = mockMedicines.find(m => m.id === medicineId);
@@ -494,18 +484,18 @@ const PatientExaminationForm = () => {
         
         setEditingKey(null); // Thoát khỏi chế độ chỉnh sửa
         medicineForm.resetFields();
-        message.success(`Đã cập nhật thuốc: ${selectedMedicine.name}`);
+        messageApi.success(`Đã cập nhật thuốc: ${selectedMedicine.name}`);
     };
 
     // ⭐️ LOGIC LƯU HỒ SƠ VÀ TỔNG HỢP DỮ LIỆU (ĐÃ CẬP NHẬT DRUGALLERGY)
     const handleSave = async () => {
         if (!currentPatient.id && !isNewPatientMode) {
-            message.error("Vui lòng chọn hoặc nhập thông tin bệnh nhân trước khi lưu hồ sơ.");
+            messageApi.error("Vui lòng chọn hoặc nhập thông tin bệnh nhân trước khi lưu hồ sơ.");
             return;
         }
 
         if (prescriptionItems.length === 0) {
-            message.error("Vui lòng kê đơn thuốc trước khi lưu.");
+            messageApi.error("Vui lòng kê đơn thuốc trước khi lưu.");
             return;
         }
 
@@ -574,13 +564,22 @@ const PatientExaminationForm = () => {
                 patient: patientPayload,
                 medicalRecord: medicalRecordPayload,
                 prescription: { items: prescriptionItemsPayload },
-                createdBy: 1 // Giả định ID người tạo
+                createdBy: currentUser.id 
             };
 
-            console.log("Dữ liệu Lưu Hồ Sơ:", payload);
-            message.success("Đã tổng hợp dữ liệu thành công! (Xem trong Console)");
-            // Ở môi trường thực tế, bạn sẽ gọi API ở đây:
-            // await api.saveMedicalRecord(payload); 
+            dispatch(fetchPostExamination(payload))
+                    .then((res) => {
+                    // Kiểm tra xem API gọi thành công không
+                    if (res.meta.requestStatus === "fulfilled") {
+                        messageApi.success("Khám bệnh đã được lưu thành công!");
+                        
+                        // 👉 Nếu muốn chuyển trang sau khi thành công:
+                        // setTimeout(() => navigate("/admin/exam"), 1000);
+                    } else {
+                        messageApi.error("Không thể lưu thông tin khám bệnh!");
+                    }
+                    })
+
 
         } catch (errorInfo) {
             console.log('Lỗi Validate Form:', errorInfo);
@@ -595,6 +594,7 @@ const PatientExaminationForm = () => {
     
     return (
         <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
+            {contextHolder}
             <Header style={{ background: '#001529', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Title level={3} style={{ color: 'white', margin: 0 }}>
                     PHIẾU KHÁM BỆNH - {currentPatient.fullName}
@@ -623,7 +623,19 @@ const PatientExaminationForm = () => {
                                     <Row gutter={16}>
                                         <Col span={12}>
                                             <Form.Item label="Mã BN">
-                                                <Input value={currentPatient.patientCode || (isNewPatientMode ? "Mới" : "Chưa chọn Mã")} disabled />
+                                                <Input value={currentPatient.patientCode || (isNewPatientMode
+                                                                                                || `BN${new Date().toLocaleString("vi-VN", {
+                                                                                                    day: "2-digit",
+                                                                                                    month: "2-digit",
+                                                                                                    year: "numeric",
+                                                                                                    hour: "2-digit",
+                                                                                                    minute: "2-digit",
+                                                                                                    hour12: false,
+                                                                                                    })
+                                                                                                    .replace(/[/: ]/g, "")
+                                                                                                    .replace(",", "-")}`
+                                                                                                )
+                                                                                            } disabled />
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
@@ -676,9 +688,8 @@ const PatientExaminationForm = () => {
                                                 <Col span={12}>
                                                     <Form.Item name="gender" label="Giới tính" initialValue="Nam" rules={[{ required: true, message: 'Chọn GT!' }]}>
                                                         <Select>
-                                                            <Option value="Nam">Nam</Option>
-                                                            <Option value="Nữ">Nữ</Option>
-                                                            <Option value="Khác">Khác</Option>
+                                                            <Option value="male">Nam</Option>
+                                                            <Option value="female">Nữ</Option>
                                                         </Select>
                                                     </Form.Item>
                                                 </Col>
@@ -715,13 +726,18 @@ const PatientExaminationForm = () => {
                                                 <Title level={5} style={{ margin: 0 }}>{currentPatient.fullName}</Title>
                                             </Descriptions.Item>
                                             <Descriptions.Item label='Tuổi/GT' span={1}>
-                                                {currentPatient.patientAgeAtVisit} / {currentPatient.gender || 'N/A'}
+                                                {currentPatient.patientAgeAtVisit} / {
+                                                    // ⭐️ SỬ DỤNG TOÁN TỬ BA NGÔI CHO GIỚI TÍNH
+                                                    currentPatient.gender 
+                                                        ? (currentPatient.gender.toLowerCase() === 'male' ? 'Nam' : 'Nữ') 
+                                                        : 'N/A'
+                                                }
                                             </Descriptions.Item>
                                             <Descriptions.Item label='Ngày Sinh' span={2}>
                                                 {currentPatient.dateOfBirth || 'N/A'}
                                             </Descriptions.Item>
                                             <Descriptions.Item label='SĐT' span={1}>
-                                                {currentPatient.phone || 'N/A'}
+                                                {currentPatient.phone || 'Không'}
                                             </Descriptions.Item>
                                             <Descriptions.Item label='Địa chỉ' span={2}>
                                                 {currentPatient.address || 'N/A'}
@@ -797,7 +813,7 @@ const PatientExaminationForm = () => {
                                     placeholder="Chọn thuốc" 
                                     style={{ width: 200 }} 
                                     showSearch 
-                                    filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                                    filterOption={(input, option) => String(option.children).toLowerCase().indexOf(input.toLowerCase()) >= 0}
                                     // Vô hiệu hóa khi chỉnh sửa (Không cho phép đổi thuốc)
                                     disabled={editingKey !== null} 
                                 >
