@@ -5,6 +5,7 @@ import DoctorDashboardLayout from './pages/Dashboard'
 import ForgetPasswordPage from './pages/ForgetPasswordPage'
 import MedicineManagement from './pages/Dashboard/MedicineManagement'
 import PatientManagement from './pages/Dashboard/PatientManagement'
+import MedicalRecordManagement from './pages/Dashboard/MedicalRecordManagement'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route path="examination" element={<ProcessExaminationPage />} />
        <Route path="medicine" element={<MedicineManagement />} />
        <Route path="patient" element={<PatientManagement />} />
+            <Route path="medicalRecord" element={<MedicalRecordManagement />} />
     </Route>
     </Routes>
   )
