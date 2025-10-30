@@ -7,6 +7,8 @@ const medicineService = {
     getDetail:function (id) {
         return API.callWithToken().get(`Medicine/${id}`);
     },
-  
+    getMedicalRecords:function (id) {
+        return API.callWithToken().get(`medical-records/${id}`);
+    },
 }
 export default medicineService;

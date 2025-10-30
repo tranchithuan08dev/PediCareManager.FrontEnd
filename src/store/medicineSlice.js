@@ -22,7 +22,20 @@ export const fetchGetAllMedicine = createAsyncThunk(`${name}/fetchGetAllMedicine
 
 export const fetchGetDetailMedicine = createAsyncThunk(`${name}/fetchGetDetailMedicine`, async (id) => {
     try {
-        const res = await medicineService.getDetail(id);
+        const res = await medicineService.getDetail(id);  
+        return res.data;
+    } catch (error) {
+        return {
+            ok: false,
+            message: 'Lỗi xảy ra'
+        }
+    }
+});
+
+
+export const fetchGetDetailMedicineRecords = createAsyncThunk(`${name}/fetchGetDetailMedicineRecords`, async (id) => {
+    try {
+        const res = await medicineService.getMedicalRecords(id);
         console.log("ress", res);
         
         return res.data;
@@ -33,7 +46,6 @@ export const fetchGetDetailMedicine = createAsyncThunk(`${name}/fetchGetDetailMe
         }
     }
 });
-
 
 
 

@@ -8,12 +8,14 @@ import {
     Tag, 
     Card,
     Descriptions,
-    Input 
+    Input,
+    message // ⭐️ IMPORT THÊM message để hiển thị thông báo giả lập
 } from 'antd';
-import { EyeOutlined, UserOutlined, PhoneOutlined, HomeOutlined, SearchOutlined } from '@ant-design/icons'; 
+import { EyeOutlined, UserOutlined, PhoneOutlined, HomeOutlined, SearchOutlined, HistoryOutlined } from '@ant-design/icons'; // ⭐️ IMPORT THÊM HistoryOutlined
 import 'antd/dist/reset.css'; 
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGetAllPatient, fetchGetDetailPatient } from '../../store/patientSlice';
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Text } = Typography;
 
@@ -24,7 +26,6 @@ const PatientManagement = () => {
     const [searchText, setSearchText] = useState(''); 
     
     const initialPatientData = useSelector((state)=> state?.PATIENT?.listPatient) || []; 
-    // const detailMedicine = useSelector((state) => state?.PATIENT?.patientDetail) 
     const dispatch = useDispatch();
     useEffect(()=>{
         dispatch(fetchGetAllPatient())
@@ -49,6 +50,8 @@ const PatientManagement = () => {
         }
         return age;
     };
+    
+    // Xử lý khi nhấn nút "Xem Chi tiết" (GIỮ NGUYÊN)
     const handleViewDetail = (record) => {
         dispatch(fetchGetDetailPatient(record.id))
             .then((response) => {
@@ -63,18 +66,28 @@ const PatientManagement = () => {
                  console.error("Lỗi mạng:", error);
             });
     };
+    const navigate = useNavigate();
+    // ⭐️ HÀM XỬ LÝ MỚI: XEM LỊCH SỬ KHÁM VÀ TOA THUỐC
+    const handleViewMedicalRecords = (record) => {
+          navigate("/admin/medicalRecord", {
+      state: { patientCode: record.patientCode }, 
+    });
+
+    };
+
     const columns = [
         {
             title: 'Mã BN',
             dataIndex: 'patientCode',
             key: 'patientCode',
-            width: 120,
+            width: 130,
             render: (code) => code || <Tag color="warning">Chưa có mã</Tag>
         },
         {
             title: 'Họ và Tên',
             dataIndex: 'fullName',
             key: 'fullName',
+            width: 300,
             render: (text) => <Text strong>{text}</Text>, 
         },
         {
@@ -117,16 +130,31 @@ const PatientManagement = () => {
         {
             title: 'Hành Động',
             key: 'action',
-            width: 120,
+            width: 230, // Tăng chiều rộng cột Hành Động
             render: (_, record) => (
-                <Button 
-                    type="default" 
-                    icon={<EyeOutlined />} 
-                    onClick={() => handleViewDetail(record)}
-                    size="small"
-                >
-                    Chi tiết
-                </Button>
+                <Space size="small"> 
+                    <Button 
+                        type="default" 
+                        icon={<EyeOutlined />} 
+                        onClick={() => handleViewDetail(record)}
+                        size="small"
+                        title="Xem chi tiết hồ sơ cá nhân"
+                    >
+                        Chi tiết
+                    </Button>
+                    
+                    {/* ⭐️ NÚT HÀNH ĐỘNG MỚI ⭐️ */}
+                    <Button 
+                        type="primary" 
+                        icon={<HistoryOutlined />} 
+                        onClick={() => handleViewMedicalRecords(record)}
+                        size="small"
+                        title="Xem lịch sử khám bệnh và toa thuốc"
+                        danger // Dùng màu khác để phân biệt
+                    >
+                        Lịch sử khám
+                    </Button>
+                </Space>
             ),
         },
     ];

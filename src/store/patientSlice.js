@@ -5,7 +5,8 @@ const name = "patient";
 
 const initialState = {
   listPatient :[],
-  patientDetail :{}
+  patientDetail :{},
+  patientHistory:[]
     
 };
 export const fetchGetAllPatient = createAsyncThunk(`${name}/fetchGetAllPatient`, async () => {
@@ -23,6 +24,17 @@ export const fetchGetAllPatient = createAsyncThunk(`${name}/fetchGetAllPatient`,
 export const fetchGetDetailPatient = createAsyncThunk(`${name}/fetchGetDetailPatient`, async (id) => {
     try {
         const res = await patientService.getDetail(id);
+        return res.data;
+    } catch (error) {
+        return {
+            ok: false,
+            message: 'Lỗi xảy ra'
+        }
+    }
+});
+export const fetchGetPatientHistory = createAsyncThunk(`${name}/fetchGetPatientHistory`, async (patientCode) => {
+    try {
+        const res = await patientService.getHistory(patientCode);
         console.log("ress", res);
         
         return res.data;
@@ -36,7 +48,6 @@ export const fetchGetDetailPatient = createAsyncThunk(`${name}/fetchGetDetailPat
 
 
 
-
 const patientSlice = createSlice({
     name,
     initialState,
@@ -47,6 +58,10 @@ const patientSlice = createSlice({
         });
         builder.addCase(fetchGetDetailPatient.fulfilled, (state, action) => {
             state.patientDetail = action.payload.data;
+        });
+         builder.addCase(fetchGetPatientHistory.fulfilled, (state, action) => {
+           
+            state.patientHistory = action.payload;
         });
 
     },

@@ -7,6 +7,9 @@ const patientService = {
     getDetail:function (id) {
         return API.callWithToken().get(`Patients/${id}`);
     },
+    getHistory:function (patientCode) {
+        return API.callWithToken().get(`Patients/history?patientCode=${patientCode}`);
+    },
   
 }
 export default patientService;

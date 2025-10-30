@@ -21,13 +21,13 @@ const menuItems = [
         key: 'dashboard',
         icon: <HomeOutlined />,
         label: 'Tổng quan',
-        path: '/admin/exam',
+        path: '/admin/medicalRecord',
     },
     {
         key: 'examination',
         icon: <SolutionOutlined />,
         label: 'Khám Bệnh (Hồ sơ)',
-        path: '/admin/exam',
+        path: '/admin/examination',
     },
     {
         key: 'appointments',
