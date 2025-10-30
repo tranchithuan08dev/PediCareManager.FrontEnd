@@ -21,7 +21,7 @@ const menuItems = [
         key: 'dashboard',
         icon: <HomeOutlined />,
         label: 'Tổng quan',
-        path: '/admin/medicalRecord',
+        path: '/admin/doctor-profile',
     },
     {
         key: 'examination',

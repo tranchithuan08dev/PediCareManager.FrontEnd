@@ -13,5 +13,8 @@ const authService = {
     getMe:function () {
         return API.callWithToken().get('Auth/me');
     },
+    changePassword:function (data) {
+        return API.call().post('Auth/change-password', data);
+    }
 }
 export default authService;

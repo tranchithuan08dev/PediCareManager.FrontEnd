@@ -9,6 +9,7 @@ import MedicalRecordManagement from './pages/Dashboard/MedicalRecordManagement'
 import { useDispatch } from 'react-redux'
 import { useEffect } from 'react'
 import { fetchMe } from './store/authSlice'
+import DoctorProfile from './pages/Dashboard/DoctorProfile'
 
 function App() {
   const dispatch = useDispatch();
@@ -29,6 +30,7 @@ function App() {
        <Route path="medicine" element={<MedicineManagement />} />
        <Route path="patient" element={<PatientManagement />} />
             <Route path="medicalRecord" element={<MedicalRecordManagement />} />
+            <Route path="doctor-profile" element={<DoctorProfile />} />
     </Route>
     </Routes>
   )

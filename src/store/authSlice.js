@@ -50,14 +50,22 @@ export const fetchResetPassword = createAsyncThunk(`${name}/fetchResetPassword`,
 export const fetchMe = createAsyncThunk(`${name}/fetchMe`, async () => {
     try {
         const res = await authService.getMe();
-        console.log("res cus", res);
-        
         return res;
     } catch (error) {
        
     }
 });
 
+export const fetchChangePassword = createAsyncThunk(`${name}/fetchChangePassword`, async (data) => {
+    try {
+        const res = await authService.changePassword(data);
+        console.log("res fetchChangePassword", res);
+        
+        return res;
+    } catch (error) {
+       
+    }
+});
 
 const authSlice = createSlice({
     name,
