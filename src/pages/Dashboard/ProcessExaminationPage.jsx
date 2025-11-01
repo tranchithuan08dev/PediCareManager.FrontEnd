@@ -28,7 +28,7 @@ const { Panel } = Collapse;
 const initialPatientData = {
     id: null,
     patientCode: null,
-    fullName: "Chưa chọn bệnh nhân", 
+    fullName: null, 
     dateOfBirth: null,
     gender: null,
     phone: null,
@@ -597,13 +597,9 @@ const PatientExaminationForm = () => {
             {contextHolder}
             <Header style={{ background: '#001529', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Title level={3} style={{ color: 'white', margin: 0 }}>
-                    PHIẾU KHÁM BỆNH - {currentPatient.fullName}
+                    PHIẾU KHÁM BỆNH
                 </Title>
-                <Space>
-                    <Button type="default" icon={<HistoryOutlined />}>Xem Lịch sử Khám</Button>
-                    {/* SỬ DỤNG HÀM handlesave */}
-                    <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>Lưu Hồ Sơ & Kê Đơn</Button>
-                </Space>
+               
             </Header>
             
             <Content style={{ padding: '10px 24px' }}>
