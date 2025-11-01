@@ -11,6 +11,7 @@ import {
 // ⭐️ Sử dụng Outlet từ react-router-dom để hiển thị nội dung trang con
 // Lưu ý: Bạn cần cài đặt và thiết lập React Router cho ứng dụng của mình.
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -49,18 +50,16 @@ const menuItems = [
     },
 ];
 
-// --- Thông tin Bác sĩ Giả định ---
-const doctorInfo = {
-    fullName: "BS. Nguyễn Văn A",
-    role: "Bác sĩ Nhi Khoa",
-};
+
 
 // --- Dropdown Menu cho Profile ---
-const profileMenu = (onLogout) => (
+const profileMenu = (onLogout, navigate) => (
     <Menu
         onClick={({ key }) => {
             if (key === 'logout') {
                 onLogout();
+                } else if (key === 'profile') {
+                navigate('/admin/doctor-profile');
             } else {
                 message.info(`Chức năng ${key} đang được phát triển.`);
             }
@@ -71,11 +70,7 @@ const profileMenu = (onLogout) => (
                 icon: <UserOutlined />,
                 label: 'Hồ sơ cá nhân',
             },
-            {
-                key: 'settings',
-                icon: <SettingOutlined />,
-                label: 'Thiết lập hệ thống',
-            },
+          
             {
                 type: 'divider',
             },
@@ -95,13 +90,14 @@ const DoctorDashboardLayout = () => {
     const [collapsed, setCollapsed] = useState(false); // Trạng thái ẩn/hiện Sider
     const navigate = useNavigate(); // Hook chuyển hướng
     const location = useLocation(); // Hook lấy vị trí hiện tại
-
+    const currentUser = useSelector((state)=> state?.AUTH?.currentuser) || []; 
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
     // ⭐️ Xử lý Đăng xuất
     const handleLogout = () => {
+         localStorage.removeItem('ACCESS_TOKEN');
         message.success("Đăng xuất thành công. Hẹn gặp lại!");
         // TODO: Xóa token/session và chuyển về trang login
         navigate('/'); 
@@ -193,9 +189,9 @@ const DoctorDashboardLayout = () => {
                         {/* Thông tin Bác sĩ và Đăng xuất */}
                         <Space size="large" style={{ paddingRight: 24 }}>
                             <Title level={5} style={{ margin: 0 }}>
-                                Xin chào, {doctorInfo.fullName}
+                                Xin chào, {currentUser.fullName}
                             </Title>
-                            <Dropdown overlay={() => profileMenu(handleLogout)} trigger={['click']}>
+                            <Dropdown overlay={() => profileMenu(handleLogout,navigate)} trigger={['click']}>
                                 <Avatar 
                                     size="large" 
                                     icon={<UserOutlined />} 

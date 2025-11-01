@@ -229,8 +229,7 @@ const PatientExaminationForm = () => {
     const results = useSelector((state)=> state?.PATIENT?.listSearch) || []; 
     const history = useSelector((state)=> state?.PATIENT?.patientHistory) || []; 
      const currentUser = useSelector((state)=> state?.AUTH?.currentuser) || []; 
-     console.log("currentUser",currentUser);
-     
+  
     const dispatch = useDispatch();
     
     // 1. useEffect GỌI API (giữ nguyên logic gốc)
