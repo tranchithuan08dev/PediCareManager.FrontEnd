@@ -44,8 +44,8 @@ const menuItems = [
     {
         key: 'reports',
         icon: <BarChartOutlined />,
-        label: 'Báo cáo & Thống kê',
-        path: '/reports',
+        label: 'Chấm công',
+        path: '/admin/attendance-widget',
     },
 ];
 
