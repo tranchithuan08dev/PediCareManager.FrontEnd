@@ -597,9 +597,12 @@ const PatientExaminationForm = () => {
             {contextHolder}
             <Header style={{ background: '#001529', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Title level={3} style={{ color: 'white', margin: 0 }}>
-                    PHIẾU KHÁM BỆNH
+                    PHIẾU KHÁM BỆNH 
                 </Title>
-               
+                <Space>
+                 
+                    <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>Lưu Hồ Sơ & Kê Đơn</Button>
+                </Space>
             </Header>
             
             <Content style={{ padding: '10px 24px' }}>
