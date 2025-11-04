@@ -11,6 +11,8 @@ import { useEffect } from 'react'
 import { fetchMe } from './store/authSlice'
 import DoctorProfile from './pages/Dashboard/DoctorProfile'
 import AttendanceWidget from './pages/Dashboard/AttendanceWidget'
+import AdminDashboard from './pages/Admin'
+import MedicineManagementAdmin from './pages/Admin/MedicineManagementAdmin'
 
 function App() {
   const dispatch = useDispatch();
@@ -21,19 +23,22 @@ function App() {
     <Routes>
       {/* Trang login */}
       <Route path="/" element={<LoginPage />} />
-      <Route path="/forgot-password" element={<ForgetPasswordPage />} />
-      {/* Dashboard chính của bác sĩ */}
-    <Route path="/admin" element={<DoctorDashboardLayout />}>
-  
-      <Route index element={<Navigate to="examination" replace />} />
-      
-      <Route path="examination" element={<ProcessExaminationPage />} />
-           <Route path="medicine" element={<MedicineManagement />} />
-           <Route path="patient" element={<PatientManagement />} />
-           <Route path="medicalRecord" element={<MedicalRecordManagement />} />
-           <Route path="doctor-profile" element={<DoctorProfile />} />
-           <Route path="attendance-widget" element={<AttendanceWidget />} />
-       </Route>
+
+      <Route path="/admin" element={<AdminDashboard />} >
+        <Route index element={<Navigate to="medicine" replace />} />
+        <Route path="medicine" element={<MedicineManagementAdmin />} />
+      </Route>
+
+      <Route path="/dashboard" element={<DoctorDashboardLayout />}>
+        <Route index element={<Navigate to="examination" replace />} />
+        <Route path="examination" element={<ProcessExaminationPage />} />
+        <Route path="medicine" element={<MedicineManagement />} />
+        <Route path="patient" element={<PatientManagement />} />
+        <Route path="medicalRecord" element={<MedicalRecordManagement />} />
+        <Route path="doctor-profile" element={<DoctorProfile />} />
+        <Route path="attendance-widget" element={<AttendanceWidget />} />
+      </Route>
+
     </Routes>
   )
 }

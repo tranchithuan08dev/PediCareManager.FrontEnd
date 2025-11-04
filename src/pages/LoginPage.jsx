@@ -25,7 +25,7 @@ const navigate = useNavigate();
       // Giả định res.payload tồn tại và có thuộc tính ok
       if (res.payload && res.payload.ok) {
         messageApi.success('Đăng nhập thành công!');
-        navigate('/admin');
+        navigate('/dashboard');
       } else {
         messageApi.error('Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu.');
       }

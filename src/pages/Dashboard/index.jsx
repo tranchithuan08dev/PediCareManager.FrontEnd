@@ -22,31 +22,31 @@ const menuItems = [
         key: 'dashboard',
         icon: <HomeOutlined />,
         label: 'Tổng quan',
-        path: '/admin/doctor-profile',
+        path: '/dashboard/doctor-profile',
     },
     {
         key: 'examination',
         icon: <SolutionOutlined />,
         label: 'Khám Bệnh (Hồ sơ)',
-        path: '/admin/examination',
+        path: '/dashboard/examination',
     },
     {
         key: 'appointments',
         icon: <ScheduleOutlined />,
         label: 'Quản lý bệnh nhân',
-        path: '/admin/patient',
+        path: '/dashboard/patient',
     },
     {
         key: 'inventory',
         icon: <MedicineBoxOutlined />,
         label: 'Kho Thuốc',
-        path: '/admin/medicine',
+        path: '/dashboard/medicine',
     },
     {
         key: 'reports',
         icon: <BarChartOutlined />,
         label: 'Chấm công',
-        path: '/admin/attendance-widget',
+        path: '/dashboard/attendance-widget',
     },
 ];
 
