@@ -13,6 +13,7 @@ import DoctorProfile from './pages/Dashboard/DoctorProfile'
 import AttendanceWidget from './pages/Dashboard/AttendanceWidget'
 import AdminDashboard from './pages/Admin'
 import MedicineManagementAdmin from './pages/Admin/MedicineManagementAdmin'
+import PatientManagementAdmin from './pages/Admin/PatientManagementAdmin'
 
 function App() {
   const dispatch = useDispatch();
@@ -27,6 +28,7 @@ function App() {
       <Route path="/admin" element={<AdminDashboard />} >
         <Route index element={<Navigate to="medicine" replace />} />
         <Route path="medicine" element={<MedicineManagementAdmin />} />
+        <Route path="patient" element={<PatientManagementAdmin />} />
       </Route>
 
       <Route path="/dashboard" element={<DoctorDashboardLayout />}>

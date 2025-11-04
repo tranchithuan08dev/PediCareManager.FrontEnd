@@ -40,8 +40,8 @@ const menuItems = [
     {
         key: 'orders',
         icon: <UserOutlined />,
-        label: 'Quản lý Đơn hàng',
-        path: '/admin/orders',
+        label: 'Quản lý khách hàng',
+        path: '/admin/patient',
     },
     {
         key: 'reports',
