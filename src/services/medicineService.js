@@ -10,5 +10,11 @@ const medicineService = {
     getMedicalRecords:function (id) {
         return API.callWithToken().get(`medical-records/${id}`);
     },
+    changeQuanlity: function (data) {
+        return API.callWithToken().post(`Medicine/${data.medicineId}/transactions`,data);
+    },
+    updateMedicine: function (data) {
+        return API.callWithToken().put(`Medicine/${data.id}`,data);
+    },
 }
 export default medicineService;

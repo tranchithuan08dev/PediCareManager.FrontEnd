@@ -60,6 +60,36 @@ export const fetchGetDetailMedicineRecords = createAsyncThunk(`${name}/fetchGetD
     }
 });
 
+export const fetchChangeQuanlity = createAsyncThunk(`${name}/fetchChangeQuanlity`, async (data) => {
+    try {
+        const res = await medicineService.changeQuanlity(data);
+        console.log("res fetchChangeQuanlity", res);
+        
+        return res.data;
+    } catch (error) {
+        return {
+            ok: false,
+            message: 'Lỗi xảy ra'
+        }
+    }
+});
+
+
+export const fetchUpdateMedicine = createAsyncThunk(`${name}/fetchUpdateMedicine`, async (data) => {
+    try {
+        const res = await medicineService.updateMedicine(data);
+        console.log("res fetchChangeQuanlity", res);
+        
+        return res.data;
+    } catch (error) {
+        return {
+            ok: false,
+            message: 'Lỗi xảy ra'
+        }
+    }
+});
+
+
 
 
 const medicineSlice = createSlice({
