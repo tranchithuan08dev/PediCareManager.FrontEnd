@@ -16,6 +16,7 @@ import MedicineManagementAdmin from './pages/Admin/MedicineManagementAdmin'
 import PatientManagementAdmin from './pages/Admin/PatientManagementAdmin'
 import DailyRevenueReport from './pages/Admin/DailyRevenueReport'
 import MonthlyTransactionReport from './pages/Admin/MonthlyTransactionReport'
+import ListDoctor from './pages/Admin/ListDoctor'
 
 function App() {
   const dispatch = useDispatch();
@@ -28,11 +29,12 @@ function App() {
       <Route path="/" element={<LoginPage />} />
 
       <Route path="/admin" element={<AdminDashboard />} >
-        <Route index element={<Navigate to="medicine" replace />} />
-        <Route path="medicine" element={<MedicineManagementAdmin />} />
-        <Route path="patient" element={<PatientManagementAdmin />} />
-            <Route path="reports" element={<DailyRevenueReport />} />
-         <Route path="monthly-transaction-report" element={<MonthlyTransactionReport />} />    
+         <Route index element={<Navigate to="medicine" replace />} />
+         <Route path="medicine" element={<MedicineManagementAdmin />} />
+         <Route path="patient" element={<PatientManagementAdmin />} />
+         <Route path="reports" element={<DailyRevenueReport />} />
+         <Route path="monthly-transaction-report" element={<MonthlyTransactionReport />} />  
+         <Route path="doctor-profile" element={<ListDoctor />} />
       </Route>
 
       <Route path="/dashboard" element={<DoctorDashboardLayout />}>

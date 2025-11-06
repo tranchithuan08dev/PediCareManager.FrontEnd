@@ -46,20 +46,20 @@ const menuItems = [
     {
         key: 'reports',
         icon: <BarChartOutlined />,
-        label: 'Báo cáo',
+        label: 'Báo cáo doanh thu',
         path: '/admin/reports',
     },
     {
         key: 'settings',
         icon: <SettingOutlined />,
-        label: 'Cài đặt',
-        path: '/admin/settings',
+        label: 'Báo cáo giao dịch',
+        path: '/admin/monthly-transaction-report',
     },
    
     {
         key: 'doctor-profile',
         icon: <HomeOutlined />,
-        label: 'Hồ sơ Bác sĩ (Mục mới 1)',
+        label: 'Hồ sơ Bác sĩ',
         path: '/admin/doctor-profile',
     },
     {

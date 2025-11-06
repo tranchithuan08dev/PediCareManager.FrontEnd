@@ -3,12 +3,14 @@ import authReducer from './authSlice'
 import medicineReducer from './medicineSlice'
 import patientReducer from './patientSlice'
 import checkAttendanceReducer from './checkAttendanceSlice'
+import userReducer from './userSlice'
 const store = configureStore({
   reducer: {
      AUTH: authReducer,
      MEDICINE: medicineReducer,
      PATIENT: patientReducer,
-    checkAttendance: checkAttendanceReducer,
+     USER   : userReducer,
+     checkAttendance: checkAttendanceReducer,
   },
 });
 
