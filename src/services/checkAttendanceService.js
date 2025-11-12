@@ -10,6 +10,10 @@ const checkAttendanceService = {
     checkStatus:function () {
         return API.callWithToken().get('Shift/status');
     },
+
+    attendanceReport:function (data) {
+        return API.callWithToken().get(`attendance-reports/doctor/${data.userId}/shift-details?year=${data.year}&month=${data.month}`);
+    },
    
 }
 export default checkAttendanceService;

@@ -44,6 +44,17 @@ export const fetchCheckStatus = createAsyncThunk(`${name}/fetchCheckStatus`, asy
   }
 });
 
+export const fetchAttendanceReport = createAsyncThunk(`${name}/fetchAttendanceReport`, async (data) => {
+  try {
+    const res = await checkAttendanceService.attendanceReport(data);
+    return res.data;
+  } catch (error) {
+   
+   
+  }
+});
+
+
 const checkAttendanceSlice = createSlice({
   name,
   initialState,
