@@ -118,7 +118,7 @@ const handleViewDetail = async (record) => {
     // --- Modal Hiển thị Chi tiết Người dùng ---
     const UserDetailModal = () => (
         <Modal
-            title={<Title level={4}>Chi Tiết Người Dùng: {selectedUser?.fullName}</Title>}
+            title={<Title level={4}>Chi Tiết Bác sĩ: {selectedUser?.fullName}</Title>}
             open={isModalVisible} 
             onCancel={() => setIsModalVisible(false)} 
             footer={[
@@ -164,7 +164,7 @@ const handleViewDetail = async (record) => {
     return (
         <div style={{ padding: '24px' }}>
             {contextHolder}
-            <Title level={3}>Danh Sách Người Dùng</Title>
+            <Title level={3}>Danh Sách Bác Sĩ</Title>
             
             <Table 
                 columns={columns} 
