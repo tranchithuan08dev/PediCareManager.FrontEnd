@@ -5,6 +5,7 @@ import {
     Divider, DatePicker, message, Modal,
     Collapse 
 } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import { 
     UserOutlined, HeartOutlined, HistoryOutlined, PlusOutlined, DeleteOutlined, SaveOutlined, MedicineBoxOutlined, SearchOutlined,
     EditOutlined // ⭐️ Icon cho Chỉnh sửa
@@ -16,6 +17,7 @@ import {  fetchGetAllMedicineProcessExamination } from '../../store/medicineSlic
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGetListPatientSearch, fetchGetPatientHistory } from '../../store/patientSlice';
 import { fetchPostExamination } from '../../store/examinationSlice';
+import ExaminationSuccessScreen from './ExaminationSuccessScreen';
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
@@ -223,7 +225,8 @@ const PatientExaminationForm = () => {
     const [messageApi, contextHolder] = message.useMessage();
     // ⭐️ BỔ SUNG STATE FLAG: Theo dõi trạng thái tìm kiếm đã được khởi tạo
     const [searchInitiated, setSearchInitiated] = useState(false); 
-    
+    const [successPayload, setSuccessPayload] = useState(null); 
+    const navigate = useNavigate();
     //GỌI HÀM Ở ĐÂY
     const mockMedicines = useSelector((state)=> state?.MEDICINE?.listMedicineProcessExamination) || []; 
     const results = useSelector((state)=> state?.PATIENT?.listSearch) || []; 
@@ -587,6 +590,7 @@ const PatientExaminationForm = () => {
                         return;
                         }
                         messageApi.success("Khám bệnh đã được lưu thành công!");
+                        setSuccessPayload({...payload, totalAmount: totalAmount, prescriptionItems: prescriptionItems});
                     })
                     .catch((err) => {
                         console.error("Unexpected error:", err);
@@ -604,7 +608,14 @@ const PatientExaminationForm = () => {
     const totalAmount = prescriptionItems.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
 
     // --- JSX Render ---
-    
+    if (successPayload) {
+        // Truyền payload đã lưu, tổng tiền và hook navigate
+        return <ExaminationSuccessScreen 
+            payload={successPayload} 
+            totalAmount={totalAmount} 
+            navigate={navigate} 
+        />;
+    }
     return (
         <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
             {contextHolder}
