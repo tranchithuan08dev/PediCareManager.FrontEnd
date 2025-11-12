@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
     Input, 
     Button, 
@@ -11,6 +11,7 @@ import {
     Row,
     Col,
     notification,
+    Select,
 } from 'antd';
 import { Line } from 'react-chartjs-2';
 import { 
@@ -27,7 +28,8 @@ import { SearchOutlined, CalendarOutlined, PlusCircleOutlined, MinusCircleOutlin
 import axios from 'axios';
 import 'antd/dist/reset.css'; 
 import API from '../../services/api';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchGetAllMedicine } from '../../store/medicineSlice';
 ChartJS.register(
     CategoryScale, 
     LinearScale, 
@@ -58,6 +60,31 @@ const MonthlyTransactionReport = () => {
     const [reportData, setReportData] = useState(initialReportData);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    
+    const medicineData = useSelector((state)=> state?.MEDICINE?.listMedicine) || []; 
+console.log("mdddd",medicineData);
+
+   const dispatch = useDispatch();
+    useEffect(()=>{
+        dispatch(fetchGetAllMedicine())
+    },[dispatch])
+
+
+// **<<< LOGIC MỚI: TẠO OPTIONS CHO SELECT TÊN THUỐC >>>**
+    const medicineOptions = useMemo(() => {
+        // 1. Tùy chọn mặc định cho "Tất cả"
+        const allOption = { value: '', label: 'Tất cả Thuốc' };
+        
+        // 2. Ánh xạ dữ liệu thuốc
+        const options = medicineData.map(medicine => ({
+            // `value` phải là ID (số) hoặc chuỗi ID
+            value: medicine.id.toString(), 
+            // `label` là tên hiển thị
+            label: `${medicine.medicineName} (ID: ${medicine.id})`, 
+        }));
+
+        return [allOption, ...options];
+    }, [medicineData]);
 
     // Hàm định dạng tiền tệ
     const formatCurrency = (amount) => {
@@ -235,14 +262,20 @@ const MonthlyTransactionReport = () => {
                         />
                     </Space>
                     <Space>
-                        <Text strong>ID Thuốc (Tùy chọn):</Text>
-                        <Input
-                            placeholder="Để trống cho tất cả"
-                            style={{ width: 150 }}
-                            value={medicineId}
-                            onChange={(e) => setMedicineId(e.target.value)}
-                        />
-                    </Space>
+                        <Text strong>Chọn Thuốc:</Text>
+                        {/* <<< THAY THẾ INPUT BẰNG SELECT >>> */}
+                        <Select
+                            showSearch
+                            placeholder="Chọn thuốc hoặc để trống"
+                            style={{ width: 250 }}
+                            value={medicineId || ''} // Dùng '' cho tùy chọn "Tất cả"
+                            onChange={(value) => setMedicineId(value)}
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                            }
+                            options={medicineOptions}
+                        />
+                    </Space>
                     <Button 
                         type="primary" 
                         icon={<SearchOutlined />} 
