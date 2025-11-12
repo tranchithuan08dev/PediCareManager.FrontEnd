@@ -23,53 +23,46 @@ import {
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
-
 const menuItems = [
-    {
-        key: 'dashboard',
-        icon: <DashboardOutlined />, 
-        label: 'Dashboard Chính',
-        path: '/dashboard', 
-    },
-    {
-        key: 'users',
-        icon: <ShoppingCartOutlined />,
-        label: 'Quản lý Thuốc',
-        path: '/admin/medicine',
-    },
-    {
-        key: 'orders',
-        icon: <UserOutlined />,
-        label: 'Quản lý khách hàng',
-        path: '/admin/patient',
-    },
-    {
-        key: 'reports',
-        icon: <BarChartOutlined />,
-        label: 'Báo cáo doanh thu',
-        path: '/admin/reports',
-    },
-    {
-        key: 'settings',
-        icon: <SettingOutlined />,
-        label: 'Báo cáo giao dịch',
-        path: '/admin/monthly-transaction-report',
-    },
-   
-    {
-        key: 'doctor-profile',
-        icon: <HomeOutlined />,
-        label: 'Hồ sơ Bác sĩ',
-        path: '/admin/doctor-profile',
-    },
-    {
-        key: 'examination',
-        icon: <SolutionOutlined />,
-        label: 'Khám Bệnh (Hồ sơ) (Mục mới 2)',
-        path: '/admin/examination',
-    },
+    {
+        key: 'dashboard',
+        icon: <DashboardOutlined />, 
+        label: 'Dashboard Chính',
+        path: '/admin/monthly-transaction-report', 
+    },
+    {
+        key: 'medicine', // Đã đổi key từ 'users' thành 'medicine'
+        icon: <ShoppingCartOutlined />,
+        label: 'Quản lý Thuốc', // Hợp lý với ShoppingCartOutlined
+        path: '/admin/medicine',
+    },
+    {
+        key: 'patient', // Đã đổi key từ 'orders' thành 'patient'
+        icon: <UserOutlined />, // Dùng UserOutlined cho Khách hàng/Bệnh nhân
+        label: 'Quản lý Bệnh nhân', // Rõ ràng hơn 'Quản lý khách hàng'
+        path: '/admin/patient',
+    },
+    {
+        key: 'revenue-reports', // Đã đổi key từ 'reports'
+        icon: <BarChartOutlined />,
+        label: 'Báo cáo doanh thu',
+        path: '/admin/reports', // Giữ nguyên path này
+    },
+    
+    
+    {
+        key: 'doctor-profile',
+        icon: <HomeOutlined />,
+        label: 'Hồ sơ Bác sĩ',
+        path: '/admin/doctor-profile',
+    },
+    {
+        key: 'attendance-reports', // Đã đổi key từ 'examination'
+        icon: <SolutionOutlined />,
+        label: 'Kiểm tra Ca làm', // Tên rõ ràng hơn 'Kiểm tra ca làm'
+        path: '/admin/attendance-reports',
+    },
 ];
-
 export default function AdminDashboard() {
   const [collapsed, setCollapsed] = useState(false);
   
