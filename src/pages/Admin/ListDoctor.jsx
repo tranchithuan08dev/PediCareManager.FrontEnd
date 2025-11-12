@@ -13,15 +13,10 @@ import { EyeOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css'; 
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGetAllUsers, fetchGetDetailUser } from '../../store/userSlice';
-// Giả định bạn có thể cần axios để gọi API thực tế
-// import axios from 'axios'; 
+
 
 const { Title, Text } = Typography;
 
-
-
-
-// -----------------------
 
 const ListDoctor = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -50,7 +45,6 @@ const handleViewDetail = async (record) => {
     const resultAction = await dispatch(fetchGetDetailUser(record.id));
 
     const detailData = resultAction.payload; 
-    console.log("detailData:", detailData);
 
     if (detailData) {
       setSelectedUser(detailData);
@@ -71,7 +65,6 @@ const handleViewDetail = async (record) => {
 };
 
 
-    // --- Cấu hình cột cho Ant Design Table ---
     const columns = [
         {
             title: 'ID', 
