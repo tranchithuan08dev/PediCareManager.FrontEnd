@@ -267,11 +267,17 @@ const PatientExaminationForm = () => {
     const [editingKey, setEditingKey] = useState(null); 
 
     useEffect(() => {
+
+        const patientCodeAtStart = currentPatient.patientCode && currentPatient.patientCode !== "Chưa có Mã" ? currentPatient.patientCode : (
+        `BN${new Date().toLocaleString("vi-VN", {
+            day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false,
+        }).replace(/[/: ]/g, "").replace(",", "-")}`
+    );
         if (!isNewPatientMode) {
             form.setFieldsValue({
                 ...currentPatient,
                 dateOfBirth: currentPatient.dateOfBirth ? moment(currentPatient.dateOfBirth, 'YYYY-MM-DD') : null,
-              
+                patientCode: currentPatient.patientCode === "Chưa có Mã" ? patientCodeAtStart : currentPatient.patientCode,
                 bodyTemperature: 37.0, 
                 bloodPressure: "120/80", 
                 heartRate: 80, 
@@ -290,6 +296,7 @@ const PatientExaminationForm = () => {
             form.resetFields();
             form.setFieldsValue({
                 fullName: searchName,
+                patientCode: patientCodeAtStart,
                 gender: 'Nam', 
                 bodyTemperature: 37.0, 
                 bloodPressure: "120/80",
@@ -517,7 +524,7 @@ const PatientExaminationForm = () => {
 
             // 1. Chuẩn bị Patient Payload
             const patientPayload = {
-                patientCode: currentPatient.patientCode === "Chưa có Mã" ? null : currentPatient.patientCode,
+               patientCode: patientData.patientCode === "Chưa có Mã" ? null : patientData.patientCode,
                 fullName: isNewPatientMode ? patientData.fullName : currentPatient.fullName,
                 dateOfBirth: dateOfBirth,
                 gender: isNewPatientMode ? patientData.gender : currentPatient.gender,
@@ -568,16 +575,23 @@ const PatientExaminationForm = () => {
 
             dispatch(fetchPostExamination(payload))
                     .then((res) => {
-                    // Kiểm tra xem API gọi thành công không
-                    if (res.meta.requestStatus === "fulfilled") {
+                        if (res.meta.requestStatus === "rejected") {
+                        messageApi.error("Không thể lưu thông tin khám bệnh! (Lỗi server)");
+                        console.error("Error:", res.error);
+                        return;
+                        }
+
+                        const data = res.payload;
+                        if (!data || data.success === false) { 
+                        messageApi.error("Không thể lưu thông tin khám bệnh! " + (data?.message || ""));
+                        return;
+                        }
                         messageApi.success("Khám bệnh đã được lưu thành công!");
-                        
-                        // 👉 Nếu muốn chuyển trang sau khi thành công:
-                        // setTimeout(() => navigate("/admin/exam"), 1000);
-                    } else {
-                        messageApi.error("Không thể lưu thông tin khám bệnh!");
-                    }
                     })
+                    .catch((err) => {
+                        console.error("Unexpected error:", err);
+                        messageApi.error("Có lỗi xảy ra khi lưu hồ sơ!");
+                    });
 
 
         } catch (errorInfo) {
@@ -617,23 +631,15 @@ const PatientExaminationForm = () => {
                                 bordered={false}
                             >
                                 {/* Thanh tìm kiếm (Giữ nguyên) */}
-                                <Form layout="vertical">
+                                <Form layout="vertical" form={form}>
                                     <Row gutter={16}>
                                         <Col span={12}>
-                                            <Form.Item label="Mã BN">
-                                                <Input value={currentPatient.patientCode || (isNewPatientMode
-                                                                                                || `BN${new Date().toLocaleString("vi-VN", {
-                                                                                                    day: "2-digit",
-                                                                                                    month: "2-digit",
-                                                                                                    year: "numeric",
-                                                                                                    hour: "2-digit",
-                                                                                                    minute: "2-digit",
-                                                                                                    hour12: false,
-                                                                                                    })
-                                                                                                    .replace(/[/: ]/g, "")
-                                                                                                    .replace(",", "-")}`
-                                                                                                )
-                                                                                            } disabled />
+                                          <Form.Item 
+                                                label="Mã BN" 
+                                                name="patientCode" 
+                                                // Giá trị ban đầu sẽ được đổ từ form.setFieldsValue trong useEffect
+                                            >
+                                                <Input disabled /> 
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
