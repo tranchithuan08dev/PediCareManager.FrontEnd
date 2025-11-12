@@ -69,7 +69,7 @@ const PatientManagement = () => {
     const navigate = useNavigate();
     // ⭐️ HÀM XỬ LÝ MỚI: XEM LỊCH SỬ KHÁM VÀ TOA THUỐC
     const handleViewMedicalRecords = (record) => {
-          navigate("/admin/medicalRecord", {
+          navigate("/dashboard/medicalRecord", {
       state: { patientCode: record.patientCode }, 
     });
 
