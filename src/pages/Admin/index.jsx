@@ -20,6 +20,7 @@ import {
   // 🚀 Icon mới bạn muốn dùng
   HomeOutlined, 
   SolutionOutlined,
+  PlusCircleOutlined,
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
@@ -48,7 +49,12 @@ const menuItems = [
         label: 'Báo cáo doanh thu',
         path: '/admin/reports', // Giữ nguyên path này
     },
-    
+     {
+        key: 'create-medicine', 
+        icon: <PlusCircleOutlined  />,
+        label: 'Tạo thuốc',
+        path: '/admin/create-medicine', 
+    },
     
     {
         key: 'doctor-profile',
