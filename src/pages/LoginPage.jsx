@@ -25,7 +25,14 @@ const navigate = useNavigate();
       // Giả định res.payload tồn tại và có thuộc tính ok
       if (res.payload && res.payload.ok) {
         messageApi.success('Đăng nhập thành công!');
+        console.log("res.payload.data.role",res.payload.data.role);
+        
+       if (res.payload.data.role === 'doctor') {
         navigate('/dashboard');
+       }else{
+        navigate('/admin');
+       }
+        
       } else {
         messageApi.error('Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu.');
       }
