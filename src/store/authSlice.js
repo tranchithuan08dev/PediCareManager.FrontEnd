@@ -12,12 +12,12 @@ export const fetchLogin = createAsyncThunk(`${name}/fetchLogin`, async (params =
     try {
         const res = await authService.login(params);
         const token = res.data.token;
-      
+        const role =  res.data.role
         return {
             ok: true,
             data: {
                 token,
-             
+                role
             }
         };
     } catch (error) {
