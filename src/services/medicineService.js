@@ -16,5 +16,8 @@ const medicineService = {
     updateMedicine: function (data) {
         return API.callWithToken().put(`Medicine/${data.id}`,data);
     },
+    postMedicine:function (data) {
+        return API.callWithToken().post(`Medicine`,data);
+    },
 }
 export default medicineService;

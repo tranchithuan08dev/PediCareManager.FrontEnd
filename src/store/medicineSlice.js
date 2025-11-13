@@ -90,7 +90,19 @@ export const fetchUpdateMedicine = createAsyncThunk(`${name}/fetchUpdateMedicine
 });
 
 
-
+export const fetchCreateMedicine = createAsyncThunk(`${name}/fetchCreateMedicine`, async (data) => {
+    try {
+        const res = await medicineService.postMedicine(data);
+        console.log("res fetchChangeQuanlity", res);
+        
+        return res.data;
+    } catch (error) {
+        return {
+            ok: false,
+            message: 'Lỗi xảy ra'
+        }
+    }
+});
 
 const medicineSlice = createSlice({
     name,
