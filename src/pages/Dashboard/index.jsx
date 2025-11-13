@@ -6,17 +6,14 @@ import {
     MenuFoldOutlined, MenuUnfoldOutlined, 
     HomeOutlined, UserSwitchOutlined, SolutionOutlined, 
     ScheduleOutlined, MedicineBoxOutlined, LogoutOutlined, 
-    UserOutlined, BarChartOutlined, SettingOutlined // Icon mới
+    UserOutlined, BarChartOutlined
 } from '@ant-design/icons';
-// ⭐️ Sử dụng Outlet từ react-router-dom để hiển thị nội dung trang con
-// Lưu ý: Bạn cần cài đặt và thiết lập React Router cho ứng dụng của mình.
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
 
-// --- Dữ liệu Menu Điều hướng (Cập nhật nếu cần) ---
 const menuItems = [
     {
         key: 'dashboard',
@@ -27,7 +24,7 @@ const menuItems = [
     {
         key: 'examination',
         icon: <SolutionOutlined />,
-        label: 'Khám Bệnh (Hồ sơ)',
+        label: 'Khám bệnh (Hồ sơ)',
         path: '/dashboard/examination',
     },
     {
@@ -39,7 +36,7 @@ const menuItems = [
     {
         key: 'inventory',
         icon: <MedicineBoxOutlined />,
-        label: 'Kho Thuốc',
+        label: 'Kho thuốc',
         path: '/dashboard/medicine',
     },
     {
@@ -50,15 +47,12 @@ const menuItems = [
     },
 ];
 
-
-
-// --- Dropdown Menu cho Profile ---
 const profileMenu = (onLogout, navigate) => (
     <Menu
         onClick={({ key }) => {
             if (key === 'logout') {
                 onLogout();
-                } else if (key === 'profile') {
+            } else if (key === 'profile') {
                 navigate('/admin/doctor-profile');
             } else {
                 message.info(`Chức năng ${key} đang được phát triển.`);
@@ -70,10 +64,7 @@ const profileMenu = (onLogout, navigate) => (
                 icon: <UserOutlined />,
                 label: 'Hồ sơ cá nhân',
             },
-          
-            {
-                type: 'divider',
-            },
+            { type: 'divider' },
             {
                 key: 'logout',
                 icon: <LogoutOutlined />,
@@ -84,97 +75,109 @@ const profileMenu = (onLogout, navigate) => (
     />
 );
 
-
-// --- Component Chính: Dashboard Layout ---
 const DoctorDashboardLayout = () => {
-    const [collapsed, setCollapsed] = useState(false); // Trạng thái ẩn/hiện Sider
-    const navigate = useNavigate(); // Hook chuyển hướng
-    const location = useLocation(); // Hook lấy vị trí hiện tại
-    const currentUser = useSelector((state)=> state?.AUTH?.currentuser) || []; 
+    const [collapsed, setCollapsed] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const currentUser = useSelector((state)=> state?.AUTH?.currentuser) || {}; 
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    // ⭐️ Xử lý Đăng xuất
     const handleLogout = () => {
-         localStorage.removeItem('ACCESS_TOKEN');
+        localStorage.removeItem('ACCESS_TOKEN');
         message.success("Đăng xuất thành công. Hẹn gặp lại!");
-        // TODO: Xóa token/session và chuyển về trang login
-        navigate('/'); 
+        navigate('/');
     };
     
-    // ⭐️ Xử lý Menu Click
     const handleMenuClick = ({ key }) => {
         const selectedItem = menuItems.find(item => item.key === key);
-        if (selectedItem && selectedItem.path) {
-            navigate(selectedItem.path);
-        }
+        if (selectedItem?.path) navigate(selectedItem.path);
     };
     
-    // ⭐️ Logic xác định key menu đang active dựa trên URL
     const activeKey = menuItems.find(item => location.pathname.startsWith(item.path))?.key || 'dashboard';
 
-
     return (
-        <Layout style={{ minHeight: '100vh' }}>
-            {/* 1. SIDER (Menu bên trái) */}
+        <Layout style={{ minHeight: '100vh', backgroundColor: '#f4f9f8' }}>
+            {/* --- SIDEBAR --- */}
             <Sider 
-                trigger={null} 
-                collapsible 
+                trigger={null}
+                collapsible
                 collapsed={collapsed}
-                width={250} // Chiều rộng menu khi mở
-                collapsedWidth={80} // Chiều rộng menu khi đóng
-                style={{ 
-                    overflow: 'auto', // Đảm bảo scroll nếu menu dài
-                    height: '100vh', 
-                    position: 'fixed', 
-                    left: 0, 
-                    top: 0, 
+                width={250}
+                collapsedWidth={80}
+                style={{
+                    overflow: 'auto',
+                    height: '100vh',
+                    position: 'fixed',
+                    left: 0,
+                    top: 0,
                     bottom: 0,
-                    zIndex: 100, // Đảm bảo Sider nằm trên các nội dung khác
+                    zIndex: 100,
+                   background: 'linear-gradient(180deg, #090822ff 0%, #282953ff 100%)',
+                    boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
                 }}
             >
-                {/* Logo/Tên Hệ thống */}
-                <div 
-                    style={{ 
-                        height: 32, 
-                        margin: 16, 
-                        textAlign: 'center', 
-                        // Màu chữ sáng hơn, phù hợp với nền tối Sider
-                        color: 'white' 
+                <div
+                    style={{
+                        height: 64,
+                        margin: 16,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: collapsed ? 'center' : 'flex-start',
+                        color: 'white',
+                        fontSize: 18,
+                        fontWeight: 600,
+                        letterSpacing: 0.5,
                     }}
                 >
-                    <UserSwitchOutlined style={{ marginRight: collapsed ? 0 : 8 }} />
-                    {!collapsed && "Nhi Khoa CMS"}
+                    <UserSwitchOutlined style={{ marginRight: collapsed ? 0 : 8, fontSize: 22 }} />
+                    {!collapsed && "Phòng Khám Nhi Khoa"}
                 </div>
-                
-                {/* Menu Điều hướng */}
+
                 <Menu
-                    theme="dark"
                     mode="inline"
-                    selectedKeys={[activeKey]} // Highlight mục đang hoạt động
-                    items={menuItems}
+                    theme="light"
+                    selectedKeys={[activeKey]}
                     onClick={handleMenuClick}
+                    items={menuItems}
+                    style={{
+                        background: 'transparent',
+                        color: 'white',
+                        fontWeight: 500,
+                    }}
                 />
+
+                <style>
+                    {`
+                        .ant-menu-light .ant-menu-item-selected {
+                            background-color: rgba(255,255,255,0.2) !important;
+                            border-radius: 8px;
+                            font-weight: 600;
+                        }
+                        .ant-menu-light .ant-menu-item:hover {
+                            background-color: rgba(255,255,255,0.15) !important;
+                        }
+                        .ant-menu-item {
+                            color: white !important;
+                        }
+                    `}
+                </style>
             </Sider>
-            
-            <Layout 
-                // Điều chỉnh margin-left của Content/Header khi Sider đóng/mở
-                style={{ marginLeft: collapsed ? 80 : 250, transition: 'margin 0.2s' }}
-            >
-                {/* 2. HEADER (Thanh tiêu đề trên) */}
+
+            {/* --- MAIN LAYOUT --- */}
+            <Layout style={{ marginLeft: collapsed ? 80 : 250, transition: 'margin 0.3s ease' }}>
                 <Header 
                     style={{ 
-                        padding: 0, 
-                        background: colorBgContainer, 
-                        position: 'sticky', 
-                        top: 0, 
-                        zIndex: 99, // Đảm bảo Header nằm trên Content
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                        padding: 0,
+                        background: '#ffffff',
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 99,
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                     }}
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        {/* Nút Toggle Menu */}
                         <Button
                             type="text"
                             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -185,37 +188,31 @@ const DoctorDashboardLayout = () => {
                                 height: 64,
                             }}
                         />
-                        
-                        {/* Thông tin Bác sĩ và Đăng xuất */}
                         <Space size="large" style={{ paddingRight: 24 }}>
-                            <Title level={5} style={{ margin: 0 }}>
-                                Xin chào, {currentUser.fullName}
+                            <Title level={5} style={{ margin: 0, color: '#333' }}>
+                                Xin chào, {currentUser.fullName || 'Bác sĩ'}
                             </Title>
-                            <Dropdown overlay={() => profileMenu(handleLogout,navigate)} trigger={['click']}>
+                            <Dropdown overlay={() => profileMenu(handleLogout, navigate)} trigger={['click']}>
                                 <Avatar 
-                                    size="large" 
-                                    icon={<UserOutlined />} 
-                                    style={{ cursor: 'pointer' }}
+                                    size="large"
+                                    icon={<UserOutlined />}
+                                    style={{ backgroundColor: '#1d2b2aff', cursor: 'pointer' }}
                                 />
                             </Dropdown>
                         </Space>
                     </div>
                 </Header>
-                
-                {/* 3. CONTENT (Nội dung chính) */}
+
                 <Content
                     style={{
-                        margin: '16px', // Khoảng cách giữa Header/Sider và nội dung
+                        margin: '16px',
                         padding: 24,
                         minHeight: 280,
                         background: colorBgContainer,
                         borderRadius: borderRadiusLG,
-                        // Thẻ Content này sẽ chứa nội dung của các trang con
                     }}
                 >
-                    {/* ⭐️ OUTLET: Nơi các component con được render */}
-                    <Outlet /> 
-                    
+                    <Outlet />
                 </Content>
             </Layout>
         </Layout>
