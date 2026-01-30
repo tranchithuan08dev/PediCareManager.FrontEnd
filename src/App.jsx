@@ -29,7 +29,7 @@ function App() {
     <Routes>
       {/* Trang login */}
       <Route path="/" element={<LoginPage />} />
-
+       <Route path="/forgot-password" element={<ForgetPasswordPage />} />
       <Route path="/admin" element={<AdminDashboard />} >
          <Route index element={<Navigate to="medicine" replace />} />
          <Route path="medicine" element={<MedicineManagementAdmin />} />
