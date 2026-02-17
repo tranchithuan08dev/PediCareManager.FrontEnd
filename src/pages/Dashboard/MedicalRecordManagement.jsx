@@ -23,7 +23,7 @@ const MedicalRecordManagement = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState(null);
    const initialRecordData = useSelector((state)=> state?.PATIENT?.patientHistory) || []; 
-  
+    
  const location = useLocation();
   const { patientCode } = location.state || {}; 
   const dispatch = useDispatch();
