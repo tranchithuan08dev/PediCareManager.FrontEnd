@@ -23,7 +23,6 @@ const MedicalRecordManagement = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState(null);
    const initialRecordData = useSelector((state)=> state?.PATIENT?.patientHistory) || []; 
-    
  const location = useLocation();
   const { patientCode } = location.state || {}; 
   const dispatch = useDispatch();
@@ -35,6 +34,31 @@ const MedicalRecordManagement = () => {
         if (!isoString) return 'N/A';
         return new Date(isoString).toLocaleString('vi-VN');
     };
+
+    function calculateAge(dateOfBirth) {
+        if (!dateOfBirth) return 'N/A';
+
+        const today = new Date();
+        const birth = new Date(dateOfBirth);
+        if (isNaN(birth)) return 'N/A';
+
+        let y = today.getFullYear() - birth.getFullYear();
+        let m = today.getMonth() - birth.getMonth();
+        let d = today.getDate() - birth.getDate();
+
+        if (d < 0) {
+            m--;
+            d += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+        }
+        if (m < 0) {
+            y--;
+            m += 12;
+        }
+
+        return y > 0 ? `${y} tuổi`
+            : m > 0 ? `${m} tháng`
+            : `${d} ngày`;
+    }
 
     const handleViewDetail = (record) => {
        
@@ -170,7 +194,7 @@ const MedicalRecordManagement = () => {
                          <Descriptions.Item label="Chuyên Khoa">
                             {selectedRecord.doctor?.specialty || 'Chung'}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Tuổi BN">{selectedRecord.patientAgeAtVisit || 'N/A'}</Descriptions.Item>
+                        <Descriptions.Item label="Tuổi BN">{calculateAge(selectedRecord.patient.dateOfBirth) || 'N/A'}</Descriptions.Item>
                     </Descriptions>
 
                     {/* KHU VỰC 2: TÌNH TRẠNG LÂM SÀNG */}
@@ -186,13 +210,13 @@ const MedicalRecordManagement = () => {
                             <Tag color="red">{selectedRecord.diagnosis || 'N/A'}</Tag>
                         </Descriptions.Item>
                         <Descriptions.Item label="Xử Trí (Treatment)">
-                            {selectedRecord.treatment || 'N/A'}
+                            {selectedRecord.treatment || 'Chưa ghi nhận'}
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Huyết Áp">{selectedRecord.bloodPressure || 'N/A'}</Descriptions.Item>
                         <Descriptions.Item label="Nhịp Tim">{selectedRecord.heartRate || 'N/A'} bpm</Descriptions.Item>
                         <Descriptions.Item label="Nhiệt Độ">{selectedRecord.bodyTemperature || 'N/A'} °C</Descriptions.Item>
-                        <Descriptions.Item label="Dị Ứng Thuốc">
+                        <Descriptions.Item label="Tiền Xử">
                             <Tag color="volcano">{selectedRecord.drugAllergy || 'Không'}</Tag>
                         </Descriptions.Item>
                         
