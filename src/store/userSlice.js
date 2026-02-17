@@ -26,8 +26,6 @@ export const fetchGetAllUsers = createAsyncThunk(`${name}/fetchGetAllUsers`, asy
 export const fetchGetDetailUser = createAsyncThunk(`${name}/fetchGetDetailUser`, async (id) => {
     try {
         const res = await userService.getDetail(id);
-        console.log("userDetai", res);
-        
         return res.data;
     } catch (error) {
         return {
