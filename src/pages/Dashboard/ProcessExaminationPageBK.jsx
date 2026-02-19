@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
     Card, Descriptions, Typography, Layout, Row, Col, 
     Button, Form, Input, InputNumber, Select, Space, Table, Alert, 
@@ -25,6 +25,162 @@ const { TextArea } = Input;
 const { Panel } = Collapse; 
 
 
+// =====================================================
+// ⭐️ CUSTOM MEDICINE SELECT với keyboard navigation
+// =====================================================
+const MedicineSearchSelect = ({ medicines, value, onChange, disabled, inputRef }) => {
+    const [inputValue, setInputValue] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
+    const dropdownRef = useRef(null);
+    const itemRefs = useRef([]);
+
+    const filtered = inputValue
+        ? medicines.filter(m =>
+            m.name.toLowerCase().includes(inputValue.toLowerCase()) ||
+            (m.unit && m.unit.toLowerCase().includes(inputValue.toLowerCase()))
+          )
+        : medicines;
+
+    // Reset khi value bị clear từ bên ngoài (sau khi thêm thuốc)
+    useEffect(() => {
+        if (value === null || value === undefined) {
+            setInputValue('');
+            setHighlightedIndex(-1);
+        }
+    }, [value]);
+
+    // Scroll item được highlight vào tầm nhìn
+    useEffect(() => {
+        if (highlightedIndex >= 0 && itemRefs.current[highlightedIndex]) {
+            itemRefs.current[highlightedIndex].scrollIntoView({ block: 'nearest' });
+        }
+    }, [highlightedIndex]);
+
+    const handleSelect = (medicine) => {
+        setInputValue(`${medicine.name} (${medicine.unit})`);
+        setIsOpen(false);
+        setHighlightedIndex(-1);
+        onChange(medicine.id);
+    };
+
+    const handleKeyDown = (e) => {
+        if (!isOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+            setIsOpen(true);
+            setHighlightedIndex(0);
+            return;
+        }
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                setHighlightedIndex(prev => (prev + 1) % filtered.length);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                setHighlightedIndex(prev => (prev <= 0 ? filtered.length - 1 : prev - 1));
+                break;
+            case 'Enter':
+                if (isOpen && highlightedIndex >= 0 && filtered[highlightedIndex]) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Ngăn form submit khi đang chọn thuốc
+                    handleSelect(filtered[highlightedIndex]);
+                }
+                break;
+            case 'Escape':
+                setIsOpen(false);
+                setHighlightedIndex(-1);
+                break;
+            default:
+                break;
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const val = e.target.value;
+        setInputValue(val);
+        setIsOpen(true);
+        setHighlightedIndex(val ? 0 : -1);
+        if (!val) onChange(null);
+    };
+
+    return (
+        <div style={{ position: 'relative', width: 230 }}>
+            <Input
+                ref={inputRef}
+                value={inputValue}
+                disabled={disabled}
+                placeholder="Tìm thuốc... (↑↓ Enter)"
+                onChange={handleInputChange}
+                onFocus={() => {
+                    setIsOpen(true);
+                    if (filtered.length > 0) setHighlightedIndex(0);
+                }}
+                onBlur={() => setTimeout(() => setIsOpen(false), 180)}
+                onKeyDown={handleKeyDown}
+                style={{ width: '100%' }}
+                autoComplete="off"
+            />
+
+            {isOpen && filtered.length > 0 && (
+                <div
+                    ref={dropdownRef}
+                    style={{
+                        position: 'absolute',
+                        zIndex: 9999,
+                        background: '#fff',
+                        border: '1px solid #d9d9d9',
+                        borderRadius: 6,
+                        maxHeight: 260,
+                        overflowY: 'auto',
+                        width: 320,
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
+                        top: '100%',
+                        left: 0,
+                        marginTop: 2,
+                    }}
+                >
+                    {filtered.map((m, idx) => (
+                        <div
+                            key={m.id}
+                            ref={el => itemRefs.current[idx] = el}
+                            onMouseDown={() => handleSelect(m)}
+                            onMouseEnter={() => setHighlightedIndex(idx)}
+                            style={{
+                                padding: '7px 12px',
+                                cursor: 'pointer',
+                                background: idx === highlightedIndex ? '#e6f7ff' : '#fff',
+                                borderBottom: '1px solid #f5f5f5',
+                                fontSize: 13,
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                transition: 'background 0.1s',
+                            }}
+                        >
+                            <strong style={{ color: idx === highlightedIndex ? '#1677ff' : '#222' }}>
+                                {m.name}
+                            </strong>
+                            <span style={{ color: '#888', marginLeft: 6, fontSize: 12 }}>— {m.unit}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {isOpen && filtered.length === 0 && inputValue && (
+                <div style={{
+                    position: 'absolute', zIndex: 9999, background: '#fff',
+                    border: '1px solid #d9d9d9', borderRadius: 6, width: 260,
+                    padding: '10px 14px', color: '#999', fontSize: 13,
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.12)', top: '100%', left: 0, marginTop: 2,
+                }}>
+                    Không tìm thấy thuốc phù hợp
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 const initialPatientData = {
     id: null,
@@ -43,20 +199,7 @@ const initialPatientData = {
 const prescriptionColumns = (onDeleteMedicine, onEditMedicine, editingKey) => [
     { title: 'Thuốc', dataIndex: 'medicineName', key: 'medicineName' },
     { title: 'Đơn vị', dataIndex: 'unit', key: 'unit', width: 80 }, 
-    { 
-        title: 'ĐG', 
-        dataIndex: 'priceSell', 
-        key: 'priceSell', 
-        width: 80, 
-        render: (text) => `${text?.toLocaleString('vi-VN') || 0}đ` 
-    }, 
     { title: 'SL', dataIndex: 'quantity', key: 'quantity', width: 60 },
-    { 
-        title: 'Thành tiền', 
-        key: 'totalPrice', 
-        width: 100,
-        render: (_, record) => `${((record.quantity || 0) * (record.priceSell || 0)).toLocaleString('vi-VN')}đ` 
-    }, 
     { title: 'Liều/Cách dùng', dataIndex: 'usageInstruction', key: 'usageInstruction' },
     {
         title: 'Hành động',
@@ -86,27 +229,17 @@ const prescriptionColumns = (onDeleteMedicine, onEditMedicine, editingKey) => [
 ];
 
 // --- Hàm hỗ trợ ---
-// ⭐️ CẬP NHẬT: Tính tuổi hoặc tháng nếu < 1 tuổi
 const calculateAge = (dob) => {
     if (!dob) return "N/A";
-
     const birthDate = moment(dob, 'YYYY-MM-DD');
     const now = moment();
-
     const years = now.diff(birthDate, 'years');
-    if (years >= 1) {
-        return `${years} tuổi`;
-    }
-
+    if (years >= 1) return `${years} tuổi`;
     const months = now.diff(birthDate, 'months');
-    if (months >= 1) {
-        return `${months} tháng`;
-    }
-
+    if (months >= 1) return `${months} tháng`;
     const days = now.diff(birthDate, 'days');
     return `${days} ngày`;
 };
-
 
 const formatUsageInstruction = (dosage, note) => {
     const parts = [];
@@ -114,22 +247,18 @@ const formatUsageInstruction = (dosage, note) => {
     if (dosage.noon > 0) parts.push(`Trưa: ${dosage.noon} viên`);
     if (dosage.afternoon > 0) parts.push(`Chiều: ${dosage.afternoon} viên`);
     if (dosage.evening > 0) parts.push(`Tối: ${dosage.evening} viên`);
-
     const totalDose = (dosage.morning || 0) + (dosage.noon || 0) + (dosage.afternoon || 0) + (dosage.evening || 0);
-    
     let instruction = parts.length > 0
         ? `Uống ${totalDose} viên/ngày. Phân liều: ${parts.join(', ')}.`
         : "Uống theo chỉ định.";
-
     if (note) instruction += ` Hướng dẫn: ${note}`;
     return instruction.trim();
 };
 
-// ⭐️ HÀM MỚI: Tính tổng số lượng thuốc dựa vào liều lượng và số ngày (làm tròn lên)
 const calculateTotalQuantity = (morning, noon, afternoon, evening, days) => {
     const dailyDose = (morning || 0) + (noon || 0) + (afternoon || 0) + (evening || 0);
     const totalQuantity = dailyDose * (days || 1);
-    return Math.ceil(totalQuantity); // Làm tròn lên
+    return Math.ceil(totalQuantity);
 };
 
 // --- Modal Tìm kiếm Bệnh nhân ---
@@ -253,8 +382,14 @@ const PatientExaminationForm = () => {
     const [successPayload, setSuccessPayload] = useState(null); 
     const navigate = useNavigate();
     
-    // ⭐️ THÊM STATE: Số ngày uống thuốc
+    // ⭐️ State: Số ngày uống thuốc
     const [medicationDays, setMedicationDays] = useState(1);
+
+    // ⭐️ REF: Để focus lại ô chọn thuốc sau khi thêm
+    const medicineInputRef = useRef(null);
+
+    // ⭐️ State: medicineId hiện tại trong form (để MedicineSearchSelect biết khi reset)
+    const [selectedMedicineId, setSelectedMedicineId] = useState(null);
     
     const DataMedicines = useSelector((state)=> state?.MEDICINE?.listMedicineProcessExamination) || []; 
     const mockMedicines = DataMedicines.filter(m => (m.stockQuantity ?? m.quantityInStock ?? 0) > 15);
@@ -262,11 +397,6 @@ const PatientExaminationForm = () => {
     const history = useSelector((state)=> state?.PATIENT?.patientHistory) || []; 
     const currentUser = useSelector((state)=> state?.AUTH?.currentuser) || []; 
     
-    console.log("history",history);
-    console.log("currentPatient",currentPatient);
-    console.log("prescriptionItems",prescriptionItems);
-    
-
     const dispatch = useDispatch();
     
     useEffect(()=>{
@@ -277,32 +407,19 @@ const PatientExaminationForm = () => {
         if (patientCodeKeyword != null) {
               dispatch(fetchGetPatientHistory(patientCodeKeyword))
         }
-       
-    },[searchKeyword,dispatch,patientCodeKeyword])
+    },[searchKeyword, dispatch, patientCodeKeyword])
 
-    //Cảnh báo thuốc
-   useEffect(() => {
-    if (!history.length) return;
-
-    // Lọc các record có drugAllergy
-    const recordsWithAllergy = history.filter(h => h.drugAllergy);
-    
-    if (recordsWithAllergy.length === 0) return; // Không có tiền sử thì không set
-
-    // Lấy record mới nhất
-    const latestRecord = recordsWithAllergy.reduce((latest, current) =>
-        new Date(current.visitDate) > new Date(latest.visitDate)
-            ? current
-            : latest
-    );
-
-    form.setFieldsValue({
-        medicalHistory: latestRecord?.drugAllergy || ""
-    });
-
+    // Cảnh báo thuốc
+    useEffect(() => {
+        if (!history.length) return;
+        const recordsWithAllergy = history.filter(h => h.drugAllergy);
+        if (recordsWithAllergy.length === 0) return;
+        const latestRecord = recordsWithAllergy.reduce((latest, current) =>
+            new Date(current.visitDate) > new Date(latest.visitDate) ? current : latest
+        );
+        form.setFieldsValue({ medicalHistory: latestRecord?.drugAllergy || "" });
     }, [history, form]); 
 
-    
     useEffect(() => {
         if (searchInitiated) {
             if (results.length > 0) {
@@ -325,10 +442,10 @@ const PatientExaminationForm = () => {
 
     useEffect(() => {
         const patientCodeAtStart = currentPatient.patientCode && currentPatient.patientCode !== "Chưa có Mã" ? currentPatient.patientCode : (
-        `BN${new Date().toLocaleString("vi-VN", {
-            day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false,
-        }).replace(/[/: ]/g, "").replace(",", "-")}`
-    );
+            `BN${new Date().toLocaleString("vi-VN", {
+                day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false,
+            }).replace(/[/: ]/g, "").replace(",", "-")}`
+        );
         if (!isNewPatientMode) {
             form.setFieldsValue({
                 ...currentPatient,
@@ -345,7 +462,7 @@ const PatientExaminationForm = () => {
                 weightKg: undefined,
                 heightCm: undefined,
                 respiratoryRate: undefined,
-                medicalHistory: undefined, // ⭐️ ĐỔI TÊN: drugAllergy → medicalHistory
+                medicalHistory: undefined,
             });
         } else {
             form.resetFields();
@@ -356,7 +473,7 @@ const PatientExaminationForm = () => {
                 bodyTemperature: 37.0, 
                 bloodPressure: "120/80",
                 heartRate: 80,
-                medicalHistory: undefined, // ⭐️ ĐỔI TÊN
+                medicalHistory: undefined,
             });
         }
     }, [currentPatient, isNewPatientMode, form, searchName]);
@@ -368,23 +485,18 @@ const PatientExaminationForm = () => {
             messageApi.warning("Vui lòng nhập Họ Tên hoặc một phần của tên để tìm kiếm.");
             return;
         }
-
-        const lowerCaseName = trimmed.toLowerCase();
-        setSearchKeyword(lowerCaseName);
+        setSearchKeyword(trimmed.toLowerCase());
         setSearchInitiated(true);
     };
     
     const handleSelectPatient = (patient) => {
         const patientAgeAtVisit = calculateAge(patient.dateOfBirth);
-        
-        setPatientCodeKeyword(patient.patientCode) 
-        
+        setPatientCodeKeyword(patient.patientCode);
         setCurrentPatient({
             ...patient,
             patientAgeAtVisit: patientAgeAtVisit,
             patientCode: patient.patientCode || "Chưa có Mã",
         });
-        
         setSearchName(patient.fullName); 
         setIsModalVisible(false);
         setIsNewPatientMode(false); 
@@ -400,7 +512,6 @@ const PatientExaminationForm = () => {
         setIsNewPatientMode(true); 
         setMedicalHistory([]);
         setEditingKey(null);
-        
         form.resetFields(); 
         form.setFieldsValue({ 
             fullName: name, 
@@ -408,15 +519,12 @@ const PatientExaminationForm = () => {
             bodyTemperature: 37.0, 
             bloodPressure: "120/80",
             heartRate: 80,
-            medicalHistory: undefined, // ⭐️ ĐỔI TÊN
+            medicalHistory: undefined,
         }); 
-        
         messageApi.info('Vui lòng nhập đầy đủ thông tin chi tiết cho bệnh nhân mới.');
     };
     
     // --- Logic Kê Đơn Thuốc ---
-
-    // ⭐️ CẬP NHẬT: Tự động tính tổng số lượng khi thay đổi liều lượng
     const handleDosageChange = () => {
         const values = medicineForm.getFieldsValue();
         const { morning, noon, afternoon, evening } = values;
@@ -424,28 +532,28 @@ const PatientExaminationForm = () => {
         medicineForm.setFieldsValue({ quantity: totalQty });
     };
 
-    // ⭐️ CẬP NHẬT: Khi thay đổi số ngày, tự động tính lại số lượng
     const handleMedicationDaysChange = (days) => {
         setMedicationDays(days || 1);
         const values = medicineForm.getFieldsValue();
         const { morning, noon, afternoon, evening } = values;
         const totalQty = calculateTotalQuantity(morning, noon, afternoon, evening, days || 1);
         medicineForm.setFieldsValue({ quantity: totalQty });
-        
-        // ⭐️ Tự động tính ngày tái khám
         if (days) {
             const nextDate = moment().add(days, 'days');
             form.setFieldsValue({ nextAppointmentDate: nextDate });
         }
     };
 
+    // ⭐️ CẬP NHẬT: Sau khi thêm thuốc xong → reset form + focus lại ô chọn thuốc
     const onAddMedicine = (values) => {
         const { medicineId, quantity, morning, noon, afternoon, evening, note } = values;
         
-        const totalDose = (morning || 0) + (noon || 0) + (afternoon || 0) + (evening || 0);
-        
-        if (quantity <= 0) {
-             return messageApi.error('Tổng Số Lượng (SL) phải lớn hơn 0!');
+        if (!medicineId) {
+            return messageApi.error('Vui lòng chọn thuốc!');
+        }
+
+        if (!quantity || quantity <= 0) {
+            return messageApi.error('Tổng Số Lượng (SL) phải lớn hơn 0!');
         }
 
         const selectedMedicine = mockMedicines.find(m => m.id === medicineId);
@@ -470,9 +578,18 @@ const PatientExaminationForm = () => {
                 note: note || "", 
             };
             
-            setPrescriptionItems([...prescriptionItems, newItem]);
+            setPrescriptionItems(prev => [...prev, newItem]);
+
+            // ⭐️ Reset form thuốc và clear selectedMedicineId để MedicineSearchSelect tự reset
             medicineForm.resetFields();
+            setSelectedMedicineId(null);
+
             messageApi.success(`Đã thêm ${selectedMedicine.name} vào đơn.`);
+
+            // ⭐️ Focus lại ô tìm kiếm thuốc sau khi thêm
+            setTimeout(() => {
+                medicineInputRef.current?.focus();
+            }, 50);
         }
     };
     
@@ -483,7 +600,7 @@ const PatientExaminationForm = () => {
 
     const onEditMedicine = (record) => {
         setEditingKey(record.key);
-        
+        setSelectedMedicineId(record.medicineId);
         medicineForm.setFieldsValue({
             medicineId: record.medicineId,
             quantity: record.quantity,
@@ -498,16 +615,20 @@ const PatientExaminationForm = () => {
 
     const onCancelEdit = () => {
         setEditingKey(null);
+        setSelectedMedicineId(null);
         medicineForm.resetFields();
         messageApi.info("Đã hủy chỉnh sửa.");
+        // Focus lại ô tìm thuốc sau khi hủy edit
+        setTimeout(() => {
+            medicineInputRef.current?.focus();
+        }, 50);
     };
 
     const onSaveEdit = (values) => {
         const { medicineId, quantity, morning, noon, afternoon, evening, note } = values;
-        const totalDose = (morning || 0) + (noon || 0) + (afternoon || 0) + (evening || 0);
         
-        if (quantity <= 0) {
-             return messageApi.error('Tổng Số Lượng (SL) phải lớn hơn 0!');
+        if (!quantity || quantity <= 0) {
+            return messageApi.error('Tổng Số Lượng (SL) phải lớn hơn 0!');
         }
 
         const selectedMedicine = mockMedicines.find(m => m.id === medicineId);
@@ -534,8 +655,14 @@ const PatientExaminationForm = () => {
         );
         
         setEditingKey(null);
+        setSelectedMedicineId(null);
         medicineForm.resetFields();
         messageApi.success(`Đã cập nhật thuốc: ${selectedMedicine.name}`);
+
+        // ⭐️ Focus lại ô tìm thuốc sau khi lưu edit
+        setTimeout(() => {
+            medicineInputRef.current?.focus();
+        }, 50);
     };
 
     const handleSave = async () => {
@@ -551,13 +678,10 @@ const PatientExaminationForm = () => {
 
         try {
             const patientData = await form.validateFields();
-            
-            // ⭐️ CẬP NHẬT: Format ngày theo DD/MM/YYYY
-           const dateOfBirth = isNewPatientMode && patientData.dateOfBirth
+            const dateOfBirth = isNewPatientMode && patientData.dateOfBirth
                 ? patientData.dateOfBirth.format('YYYY-MM-DD')
                 : currentPatient.dateOfBirth || null;
 
-            
             const nextAppointmentDate = patientData.nextAppointmentDate
                 ? patientData.nextAppointmentDate.format('YYYY-MM-DD')
                 : null;
@@ -566,7 +690,6 @@ const PatientExaminationForm = () => {
                 ? (patientData.weightKg / Math.pow(patientData.heightCm / 100, 2)).toFixed(1)
                 : null;
                 
-            // ⭐️ ĐỔI TÊN: drugAllergy → medicalHistory
             const medicalHistoryFromForm = patientData.medicalHistory || "";
 
             const patientPayload = {
@@ -594,7 +717,7 @@ const PatientExaminationForm = () => {
                 respiratoryRate: patientData.respiratoryRate || null, 
                 bmi: bmi,
                 bloodPressure: patientData.bloodPressure || "",
-                drugAllergy: medicalHistoryFromForm, // ⭐️ ĐỔI TÊN
+                drugAllergy: medicalHistoryFromForm,
             };
 
             const prescriptionItemsPayload = prescriptionItems.map(item => {
@@ -618,20 +741,22 @@ const PatientExaminationForm = () => {
                 .then((res) => {
                     if (res.meta.requestStatus === "rejected") {
                         messageApi.error("Không thể lưu thông tin khám bệnh! (Lỗi server)");
-                        console.error("Error:", res.error);
                         return;
                     }
-
                     const data = res.payload;
                     if (!data || data.success === false) { 
                         messageApi.error("Không thể lưu thông tin khám bệnh! " + (data?.message || ""));
                         return;
                     }
                     messageApi.success("Khám bệnh đã được lưu thành công!");
-                    setSuccessPayload({...payload, totalAmount: totalAmount, prescriptionItems: prescriptionItems});
+                    setSuccessPayload({
+                        ...payload,
+                        totalAmount: totalAmount,
+                        prescriptionItems: prescriptionItems,
+                        medicationDays: medicationDays,
+                    });
                 })
                 .catch((err) => {
-                    console.error("Unexpected error:", err);
                     messageApi.error("Có lỗi xảy ra khi lưu hồ sơ!");
                 });
 
@@ -640,13 +765,25 @@ const PatientExaminationForm = () => {
         }
     };
     
+    // ⭐️ Ctrl+S → submit hồ sơ
+    useEffect(() => {
+        const handleCtrlS = (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                handleSave();
+            }
+        };
+        window.addEventListener('keydown', handleCtrlS);
+        return () => window.removeEventListener('keydown', handleCtrlS);
+    }, [currentPatient, isNewPatientMode, prescriptionItems, medicationDays]);
+
     const totalAmount = prescriptionItems.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
 
-    // --- JSX Render ---
     if (successPayload) {
         return <ExaminationSuccessScreen 
             payload={successPayload} 
-            totalAmount={totalAmount} 
+            totalAmount={successPayload.totalAmount} 
+            medicationDays={successPayload.medicationDays}
             navigate={navigate} 
         />;
     }
@@ -659,7 +796,9 @@ const PatientExaminationForm = () => {
                     PHIẾU KHÁM BỆNH 
                 </Title>
                 <Space>
-                    <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>Lưu Hồ Sơ & Kê Đơn</Button>
+                    <Button type="primary" icon={<SaveOutlined />} onClick={handleSave} title="Lưu hồ sơ (Ctrl+S)">
+                        Lưu Hồ Sơ & Kê Đơn <span style={{ fontSize: 11, opacity: 0.75, marginLeft: 4 }}>(Ctrl+S)</span>
+                    </Button>
                 </Space>
             </Header>
             
@@ -668,7 +807,7 @@ const PatientExaminationForm = () => {
                     
                     <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
                         
-                        {/* CỘT TRÁI: THÔNG TIN BỆNH NHÂN & CHỈ SỐ SINH TỒN */}
+                        {/* CỘT TRÁI */}
                         <Col span={11}>
                             <Card 
                                 title={<><UserOutlined /> Thông Tin & Chỉ Số Cơ Bản</>} 
@@ -698,7 +837,6 @@ const PatientExaminationForm = () => {
                                 
                                 <Divider style={{ margin: '10px 0' }} />
 
-                                {/* FORM NHẬP THÔNG TIN CHI TIẾT (BN MỚI) */}
                                 {isNewPatientMode ? (
                                     <Card size="small" type="inner" title="Nhập Thông Tin Bệnh Nhân Mới" style={{ marginBottom: 10 }}>
                                         <Form 
@@ -745,7 +883,6 @@ const PatientExaminationForm = () => {
                                             <Form.Item name="address" label="Địa chỉ">
                                                 <Input placeholder="Số nhà, đường, quận/huyện..." />
                                             </Form.Item>
-                                          
                                             <Divider orientation="left" style={{ margin: '10px 0' }}>Người Đại Diện (Nếu cần)</Divider>
                                             <Row gutter={16}>
                                                 <Col span={12}>
@@ -762,35 +899,33 @@ const PatientExaminationForm = () => {
                                         </Form>
                                     </Card>
                                 ) : (
-                                    <>
-                                        <Descriptions bordered size="small" column={3}>
-                                            <Descriptions.Item label='Họ Tên' span={3}>
-                                                <Title level={5} style={{ margin: 0 }}>{currentPatient.fullName}</Title>
-                                            </Descriptions.Item>
-                                            <Descriptions.Item label='Tuổi/GT' span={1}>
-                                                {currentPatient.patientAgeAtVisit} / {
-                                                    currentPatient.gender 
-                                                        ? (currentPatient.gender.toLowerCase() === 'male' ? 'Nam' : 'Nữ') 
-                                                        : 'N/A'
-                                                }
-                                            </Descriptions.Item>
-                                            <Descriptions.Item label='Ngày Sinh' span={2}>
-                                                {currentPatient.dateOfBirth ? moment(currentPatient.dateOfBirth).format('DD/MM/YYYY') : 'N/A'}
-                                            </Descriptions.Item>
-                                            <Descriptions.Item label='SĐT' span={1}>
-                                                {currentPatient.phone || 'Không'}
-                                            </Descriptions.Item>
-                                            <Descriptions.Item label='Địa chỉ' span={2}>
-                                                {currentPatient.address || 'N/A'}
-                                            </Descriptions.Item>
-                                            <Descriptions.Item label='Người Đại diện' span={2}>
-                                                {currentPatient.representativeName || 'N/A'}
-                                            </Descriptions.Item>
-                                            <Descriptions.Item label='SĐT Đại diện' span={1}>
-                                                {currentPatient.representativePhone || 'N/A'}
-                                            </Descriptions.Item>
-                                        </Descriptions>
-                                    </>
+                                    <Descriptions bordered size="small" column={3}>
+                                        <Descriptions.Item label='Họ Tên' span={3}>
+                                            <Title level={5} style={{ margin: 0 }}>{currentPatient.fullName}</Title>
+                                        </Descriptions.Item>
+                                        <Descriptions.Item label='Tuổi/GT' span={1}>
+                                            {currentPatient.patientAgeAtVisit} / {
+                                                currentPatient.gender 
+                                                    ? (currentPatient.gender.toLowerCase() === 'male' ? 'Nam' : 'Nữ') 
+                                                    : 'N/A'
+                                            }
+                                        </Descriptions.Item>
+                                        <Descriptions.Item label='Ngày Sinh' span={2}>
+                                            {currentPatient.dateOfBirth ? moment(currentPatient.dateOfBirth).format('DD/MM/YYYY') : 'N/A'}
+                                        </Descriptions.Item>
+                                        <Descriptions.Item label='SĐT' span={1}>
+                                            {currentPatient.phone || 'Không'}
+                                        </Descriptions.Item>
+                                        <Descriptions.Item label='Địa chỉ' span={2}>
+                                            {currentPatient.address || 'N/A'}
+                                        </Descriptions.Item>
+                                        <Descriptions.Item label='Người Đại diện' span={2}>
+                                            {currentPatient.representativeName || 'N/A'}
+                                        </Descriptions.Item>
+                                        <Descriptions.Item label='SĐT Đại diện' span={1}>
+                                            {currentPatient.representativePhone || 'N/A'}
+                                        </Descriptions.Item>
+                                    </Descriptions>
                                 )}
 
                                 <Divider orientation="left" style={{ marginTop: 15, marginBottom: 10 }}>Chỉ Số Sinh Tồn</Divider>
@@ -804,16 +939,13 @@ const PatientExaminationForm = () => {
                             </Card>
                         </Col>
 
-                        {/* CỘT PHẢI: KHÁM LÂM SÀNG & CHẨN ĐOÁN */}
+                        {/* CỘT PHẢI */}
                         <Col span={13}>
                             <Card title={<><HeartOutlined /> Khám Lâm Sàng & Chẩn Đoán</>} size="small" bordered={false} style={{ height: '100%' }}>
                                 <Form layout="vertical" form={form}>
-                                    {/* ⭐️ CẬP NHẬT: Triệu chứng KHÔNG BẮT BUỘC */}
                                     <Form.Item name="symptoms" label="Triệu Chứng/Tình trạng hiện tại">
                                         <TextArea rows={2} placeholder="Ho, sốt, đau họng..." />
                                     </Form.Item>
-                                    
-                                    {/* ⭐️ CẬP NHẬT: Khám lâm sàng BẮT BUỘC */}
                                     <Form.Item 
                                         name="clinicalFindings" 
                                         label="Khám Lâm Sàng" 
@@ -821,7 +953,6 @@ const PatientExaminationForm = () => {
                                     >
                                         <TextArea rows={2} placeholder="Họng đỏ, phổi thông khí tốt..." />
                                     </Form.Item>
-                                    
                                     <Form.Item name="diagnosis" label="Chẩn Đoán" rules={[{ required: true, message: 'Nhập chẩn đoán!' }]}>
                                         <Input placeholder="Viêm họng cấp do virus" />
                                     </Form.Item>
@@ -831,26 +962,22 @@ const PatientExaminationForm = () => {
                                     <Form.Item name="notes" label="Ghi Chú Chung">
                                         <TextArea rows={1} placeholder="Lưu ý: Hẹn tái khám sau 3 ngày." />
                                     </Form.Item>
-                                    
                                     <Divider orientation="left" style={{ margin: '10px 0' }}>Thông số bổ sung</Divider>
-                                 
                                     <Row gutter={16}>
                                         <Col span={8}>
-                                        <Form.Item name="weightKg" label="Cân Nặng (kg)" rules={[{ required: true, message: "Vui lòng nhập cân nặng" }]}>
-                                            <InputNumber min={1} step={0.1} style={{ width: '100%' }} />
-                                        </Form.Item>
+                                            <Form.Item name="weightKg" label="Cân Nặng (kg)" rules={[{ required: true, message: "Vui lòng nhập cân nặng" }]}>
+                                                <InputNumber min={1} step={0.1} style={{ width: '100%' }} />
+                                            </Form.Item>
                                         </Col>
-
                                         <Col span={8}>
-                                        <Form.Item name="heightCm" label="Chiều Cao (cm)" rules={[{ required: true, message: "Vui lòng nhập chiều cao" }]}>
-                                            <InputNumber min={50} step={0.1} style={{ width: '100%' }} />
-                                        </Form.Item>
+                                            <Form.Item name="heightCm" label="Chiều Cao (cm)" >
+                                                <InputNumber min={50} step={0.1} style={{ width: '100%' }} />
+                                            </Form.Item>
                                         </Col>
-
                                         <Col span={8}>
-                                        <Form.Item name="respiratoryRate" label="Nhịp Thở (l/phút)" initialValue={18}>
-                                            <InputNumber min={1} style={{ width: '100%' }} />
-                                        </Form.Item>
+                                            <Form.Item name="respiratoryRate" label="Nhịp Thở (l/phút)" initialValue={18}>
+                                                <InputNumber min={1} style={{ width: '100%' }} />
+                                            </Form.Item>
                                         </Col>
                                     </Row>
                                     <Row gutter={16}>
@@ -859,7 +986,6 @@ const PatientExaminationForm = () => {
                                                 <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
                                             </Form.Item>
                                         </Col>
-                                        {/* ⭐️ ĐỔI TÊN: Dị Ứng Thuốc → Tiền Sử */}
                                         <Col span={12}>
                                             <Form.Item name="medicalHistory" label="Tiền Sử">
                                                 <Input placeholder="Ví dụ: Dị ứng Penicillin, tiểu đường..." />
@@ -873,7 +999,6 @@ const PatientExaminationForm = () => {
                     
                     {/* HÀNG 2: KÊ ĐƠN THUỐC */}
                     <Card title={<><MedicineBoxOutlined /> Kê Đơn Thuốc Hiện Tại</>} size="small" bordered={false}>
-                        {/* ⭐️ THÊM: Ô nhập Số Ngày */}
                         <Row gutter={16} style={{ marginBottom: 10 }}>
                             <Col span={6}>
                                 <Form.Item label="Số Ngày Uống Thuốc" style={{ marginBottom: 0 }}>
@@ -891,26 +1016,31 @@ const PatientExaminationForm = () => {
                             </Col>
                         </Row>
                         
-                        {/* Form thêm/chỉnh sửa thuốc */}
+                        {/* ⭐️ Form thêm/chỉnh sửa thuốc với MedicineSearchSelect */}
                         <Form 
                             form={medicineForm} 
                             onFinish={editingKey !== null ? onSaveEdit : onAddMedicine} 
                             layout="inline" 
                             style={{ marginBottom: 10, padding: '10px', border: '1px dashed #ccc', borderRadius: 4 }}
                         >
-                            <Form.Item name="medicineId" label="Thuốc" rules={[{ required: true, message: 'Chọn thuốc!' }]}>
-                                <Select 
-                                    placeholder="Chọn thuốc" 
-                                    style={{ width: 200 }} 
-                                    showSearch 
-                                    filterOption={(input, option) => String(option.children).toLowerCase().indexOf(input.toLowerCase()) >= 0}
-                                    disabled={editingKey !== null} 
-                                >
-                                    {mockMedicines.map(m => <Option key={m.id} value={m.id}>{m.name} - {m.unit}</Option>)}
-                                </Select>
+                            {/* ⭐️ THAY THẾ: Dùng MedicineSearchSelect thay cho Ant Design Select */}
+                            <Form.Item
+                                name="medicineId"
+                                label="Thuốc"
+                                rules={[{ required: true, message: 'Chọn thuốc!' }]}
+                            >
+                                <MedicineSearchSelect
+                                    medicines={mockMedicines}
+                                    value={selectedMedicineId}
+                                    onChange={(id) => {
+                                        setSelectedMedicineId(id);
+                                        medicineForm.setFieldsValue({ medicineId: id });
+                                    }}
+                                    disabled={editingKey !== null}
+                                    inputRef={medicineInputRef}
+                                />
                             </Form.Item>
                             
-                            {/* ⭐️ CẬP NHẬT: Các ô liều lượng tự động tính tổng SL */}
                             <Form.Item name="morning" label="Sáng">
                                 <InputNumber min={0} step={0.25} style={{ width: 60 }} onChange={handleDosageChange} />
                             </Form.Item>
@@ -924,7 +1054,6 @@ const PatientExaminationForm = () => {
                                 <InputNumber min={0} step={0.25} style={{ width: 60 }} onChange={handleDosageChange} />
                             </Form.Item>
                             
-                            {/* ⭐️ Tổng SL tự động tính */}
                             <Form.Item name="quantity" label="Tổng SL" rules={[{ required: true, message: 'SL tự động!' }]}>
                                 <InputNumber disabled style={{ width: 70 }} />
                             </Form.Item>
@@ -957,7 +1086,7 @@ const PatientExaminationForm = () => {
                         />
                         
                         <div style={{ textAlign: 'right', marginTop: 10, paddingRight: 20, fontSize: '1.2em', fontWeight: 'bold', color: '#08979c' }}>
-                            TỔNG TIỀN THUỐC: {totalAmount.toLocaleString('vi-VN')}đ
+                            {/* TỔNG TIỀN THUỐC: {totalAmount.toLocaleString('vi-VN')}đ */}
                         </div>
                         
                         {medicalHistory.length > 0 && <OldPrescriptionHistory history={medicalHistory} />}
