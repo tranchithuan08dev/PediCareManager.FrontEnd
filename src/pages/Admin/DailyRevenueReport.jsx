@@ -60,7 +60,6 @@ const DailyRevenueReport = () => {
         
        const apiUrl = `medical-records/daily-revenue?startDate=${startDate}&endDate=${endDate}`;
 
-        console.log(`Đang gọi API: ${apiUrl}`);
 
         try {
             // Thay thế bằng cuộc gọi API thực tế của bạn

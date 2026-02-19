@@ -25,8 +25,6 @@ const navigate = useNavigate();
       // Giả định res.payload tồn tại và có thuộc tính ok
       if (res.payload && res.payload.ok) {
         messageApi.success('Đăng nhập thành công!');
-        console.log("res.payload.data.role",res.payload.data.role);
-        
        if (res.payload.data.role === 'doctor') {
         navigate('/dashboard');
        }else{
