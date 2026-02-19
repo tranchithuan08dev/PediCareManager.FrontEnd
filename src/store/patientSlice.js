@@ -36,7 +36,7 @@ export const fetchGetDetailPatient = createAsyncThunk(`${name}/fetchGetDetailPat
 export const fetchGetPatientHistory = createAsyncThunk(`${name}/fetchGetPatientHistory`, async (patientCode) => {
     try {
         const res = await patientService.getHistory(patientCode);
-        console.log("ress", res);
+
         
         return res.data;
     } catch (error) {

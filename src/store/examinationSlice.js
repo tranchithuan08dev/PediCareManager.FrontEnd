@@ -9,7 +9,7 @@ const initialState = {
 export const fetchPostExamination = createAsyncThunk(`${name}/fetchPostExamination`, async (data) => {
     try {
         const res = await examinationService.postExamination(data);
-        console.log("post", res);
+  
         
         return res;
     } catch (error) {

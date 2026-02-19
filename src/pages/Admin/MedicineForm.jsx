@@ -35,7 +35,6 @@ const MedicineForm = () => {
           : null,
       };
 
-      console.log('Received values of form:', formattedValues);
 
       const resultAction = await dispatch(fetchCreateMedicine(formattedValues));
 

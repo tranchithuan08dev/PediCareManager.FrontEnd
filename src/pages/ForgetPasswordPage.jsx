@@ -22,7 +22,6 @@ const callResetPasswordApi = async (data) => {
     // Giả lập API gọi thành công sau 1 giây
     return new Promise(resolve => {
         setTimeout(() => {
-            console.log(`[API 2] Đặt lại mật khẩu cho: ${email}, OTP: ${otp}, Mật khẩu mới: ${newPassword}`);
             resolve({ success: true });
         }, 1000);
     });
@@ -135,7 +134,6 @@ const ForgetPasswordPage = () => {
     const Step2 = () => {
         const onFinishStep2 = async (values) => {
         
-        console.log(values);
         const data = {
             email : email,
             newPassword: values.newPassword,

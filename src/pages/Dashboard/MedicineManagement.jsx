@@ -24,8 +24,7 @@ const MedicineManagement = () => {
 
     const initialData = useSelector((state)=> state?.MEDICINE?.listMedicine) || []; 
     const detailMedicine = useSelector((state) => state?.MEDICINE?.medicineDetail)
-    console.log("detail", detailMedicine);
-    
+
     const dispatch = useDispatch();
     useEffect(()=>{
         dispatch(fetchGetAllMedicine())

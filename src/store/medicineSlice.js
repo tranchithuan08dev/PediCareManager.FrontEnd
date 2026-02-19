@@ -63,7 +63,7 @@ export const fetchGetDetailMedicineRecords = createAsyncThunk(`${name}/fetchGetD
 export const fetchChangeQuanlity = createAsyncThunk(`${name}/fetchChangeQuanlity`, async (data) => {
     try {
         const res = await medicineService.changeQuanlity(data);
-        console.log("res fetchChangeQuanlity", res);
+
         
         return res.data;
     } catch (error) {
@@ -78,7 +78,7 @@ export const fetchChangeQuanlity = createAsyncThunk(`${name}/fetchChangeQuanlity
 export const fetchUpdateMedicine = createAsyncThunk(`${name}/fetchUpdateMedicine`, async (data) => {
     try {
         const res = await medicineService.updateMedicine(data);
-        console.log("res fetchChangeQuanlity", res);
+
         
         return res.data;
     } catch (error) {
@@ -93,7 +93,6 @@ export const fetchUpdateMedicine = createAsyncThunk(`${name}/fetchUpdateMedicine
 export const fetchCreateMedicine = createAsyncThunk(`${name}/fetchCreateMedicine`, async (data) => {
     try {
         const res = await medicineService.postMedicine(data);
-        console.log("res fetchChangeQuanlity", res);
         
         return res.data;
     } catch (error) {

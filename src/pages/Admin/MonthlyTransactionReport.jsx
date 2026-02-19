@@ -62,7 +62,7 @@ const MonthlyTransactionReport = () => {
     const [error, setError] = useState(null);
     
     const medicineData = useSelector((state)=> state?.MEDICINE?.listMedicine) || []; 
-console.log("mdddd",medicineData);
+
 
    const dispatch = useDispatch();
     useEffect(()=>{

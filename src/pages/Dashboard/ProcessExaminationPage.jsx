@@ -330,7 +330,7 @@ const PatientExaminationForm = () => {
     // ⭐️ CHỈNH SỬA: handleSelectPatient chỉ chọn bệnh nhân và kích hoạt load lịch sử
     const handleSelectPatient = (patient) => {
         const patientAgeAtVisit = calculateAge(patient.dateOfBirth);
-        console.log("patient",patient);
+
         
         // Kích hoạt load lịch sử
         setPatientCodeKeyword(patient.patientCode) 
@@ -599,7 +599,6 @@ const PatientExaminationForm = () => {
 
 
         } catch (errorInfo) {
-            console.log('Lỗi Validate Form:', errorInfo);
             message.error("Vui lòng nhập đầy đủ các trường bắt buộc (Họ tên, ngày sinh, Triệu chứng, Chẩn đoán).");
         }
     };
