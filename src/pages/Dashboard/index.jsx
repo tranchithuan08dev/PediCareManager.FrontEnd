@@ -53,7 +53,7 @@ const profileMenu = (onLogout, navigate) => (
             if (key === 'logout') {
                 onLogout();
             } else if (key === 'profile') {
-                navigate('/admin/doctor-profile');
+                navigate('/dashboard/doctor-profile');
             } else {
                 message.info(`Chức năng ${key} đang được phát triển.`);
             }
