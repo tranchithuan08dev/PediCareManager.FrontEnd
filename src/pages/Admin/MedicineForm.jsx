@@ -25,7 +25,7 @@ const MedicineForm = () => {
 
   const onFinish = async (values) => {
     try {
-      const createdByUserId = currentUser?.id ?? null;
+      const createdByUserId = currentUser?.id;
 
       const formattedValues = {
         ...values,
