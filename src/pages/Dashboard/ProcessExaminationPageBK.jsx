@@ -241,15 +241,17 @@ const calculateAge = (dob) => {
     return `${days} ngày`;
 };
 
-const formatUsageInstruction = (dosage, note) => {
+// ✅ ĐÃ SỬA: Nhận thêm tham số `unit` để hiển thị đúng đơn vị (viên, gói, ...)
+const formatUsageInstruction = (dosage, note, unit = 'viên') => {
+    const u = unit?.trim() || 'viên';
     const parts = [];
-    if (dosage.morning > 0) parts.push(`Sáng: ${dosage.morning} viên`);
-    if (dosage.noon > 0) parts.push(`Trưa: ${dosage.noon} viên`);
-    if (dosage.afternoon > 0) parts.push(`Chiều: ${dosage.afternoon} viên`);
-    if (dosage.evening > 0) parts.push(`Tối: ${dosage.evening} viên`);
+    if (dosage.morning > 0) parts.push(`Sáng: ${dosage.morning} ${u}`);
+    if (dosage.noon > 0) parts.push(`Trưa: ${dosage.noon} ${u}`);
+    if (dosage.afternoon > 0) parts.push(`Chiều: ${dosage.afternoon} ${u}`);
+    if (dosage.evening > 0) parts.push(`Tối: ${dosage.evening} ${u}`);
     const totalDose = (dosage.morning || 0) + (dosage.noon || 0) + (dosage.afternoon || 0) + (dosage.evening || 0);
     let instruction = parts.length > 0
-        ? `Uống ${totalDose} viên/ngày. Phân liều: ${parts.join(', ')}.`
+        ? `Uống ${totalDose} ${u}/ngày. Phân liều: ${parts.join(', ')}.`
         : "Uống theo chỉ định.";
     if (note) instruction += ` Hướng dẫn: ${note}`;
     return instruction.trim();
@@ -469,7 +471,7 @@ const PatientExaminationForm = () => {
             form.setFieldsValue({
                 fullName: searchName,
                 patientCode: patientCodeAtStart,
-                gender: 'Nam', 
+                gender: 'male', 
                 bodyTemperature: 37.0, 
                 bloodPressure: "120/80",
                 heartRate: 80,
@@ -515,7 +517,7 @@ const PatientExaminationForm = () => {
         form.resetFields(); 
         form.setFieldsValue({ 
             fullName: name, 
-            gender: 'Nam',
+            gender: 'male',
             bodyTemperature: 37.0, 
             bloodPressure: "120/80",
             heartRate: 80,
@@ -544,7 +546,7 @@ const PatientExaminationForm = () => {
         }
     };
 
-    // ⭐️ CẬP NHẬT: Sau khi thêm thuốc xong → reset form + focus lại ô chọn thuốc
+    // ✅ ĐÃ SỬA: Truyền selectedMedicine.unit vào formatUsageInstruction
     const onAddMedicine = (values) => {
         const { medicineId, quantity, morning, noon, afternoon, evening, note } = values;
         
@@ -560,7 +562,12 @@ const PatientExaminationForm = () => {
         
         if (selectedMedicine) {
             const newKey = Date.now();
-            const usageInstruction = formatUsageInstruction({ morning, noon, afternoon, evening }, note);
+            // ✅ Truyền unit của thuốc để hiển thị đúng (viên, gói, ...)
+            const usageInstruction = formatUsageInstruction(
+                { morning, noon, afternoon, evening },
+                note,
+                selectedMedicine.unit
+            );
 
             const newItem = {
                 key: newKey,
@@ -580,13 +587,13 @@ const PatientExaminationForm = () => {
             
             setPrescriptionItems(prev => [...prev, newItem]);
 
-            // ⭐️ Reset form thuốc và clear selectedMedicineId để MedicineSearchSelect tự reset
+            // Reset form thuốc và clear selectedMedicineId để MedicineSearchSelect tự reset
             medicineForm.resetFields();
             setSelectedMedicineId(null);
 
             messageApi.success(`Đã thêm ${selectedMedicine.name} vào đơn.`);
 
-            // ⭐️ Focus lại ô tìm kiếm thuốc sau khi thêm
+            // Focus lại ô tìm kiếm thuốc sau khi thêm
             setTimeout(() => {
                 medicineInputRef.current?.focus();
             }, 50);
@@ -624,6 +631,7 @@ const PatientExaminationForm = () => {
         }, 50);
     };
 
+    // ✅ ĐÃ SỬA: Truyền selectedMedicine.unit vào formatUsageInstruction
     const onSaveEdit = (values) => {
         const { medicineId, quantity, morning, noon, afternoon, evening, note } = values;
         
@@ -632,7 +640,12 @@ const PatientExaminationForm = () => {
         }
 
         const selectedMedicine = mockMedicines.find(m => m.id === medicineId);
-        const usageInstruction = formatUsageInstruction({ morning, noon, afternoon, evening }, note);
+        // ✅ Truyền unit của thuốc để hiển thị đúng (viên, gói, ...)
+        const usageInstruction = formatUsageInstruction(
+            { morning, noon, afternoon, evening },
+            note,
+            selectedMedicine.unit
+        );
 
         const updatedItem = {
             key: editingKey,
@@ -659,7 +672,7 @@ const PatientExaminationForm = () => {
         medicineForm.resetFields();
         messageApi.success(`Đã cập nhật thuốc: ${selectedMedicine.name}`);
 
-        // ⭐️ Focus lại ô tìm thuốc sau khi lưu edit
+        // Focus lại ô tìm thuốc sau khi lưu edit
         setTimeout(() => {
             medicineInputRef.current?.focus();
         }, 50);
@@ -867,7 +880,7 @@ const PatientExaminationForm = () => {
                                             </Row>
                                             <Row gutter={16}>
                                                 <Col span={12}>
-                                                    <Form.Item name="gender" label="Giới tính" initialValue="Nam" rules={[{ required: true, message: 'Chọn GT!' }]}>
+                                                    <Form.Item name="gender" label="Giới tính" initialValue="male" rules={[{ required: true, message: 'Chọn GT!' }]}>
                                                         <Select>
                                                             <Option value="male">Nam</Option>
                                                             <Option value="female">Nữ</Option>
@@ -1016,14 +1029,13 @@ const PatientExaminationForm = () => {
                             </Col>
                         </Row>
                         
-                        {/* ⭐️ Form thêm/chỉnh sửa thuốc với MedicineSearchSelect */}
+                        {/* Form thêm/chỉnh sửa thuốc với MedicineSearchSelect */}
                         <Form 
                             form={medicineForm} 
                             onFinish={editingKey !== null ? onSaveEdit : onAddMedicine} 
                             layout="inline" 
                             style={{ marginBottom: 10, padding: '10px', border: '1px dashed #ccc', borderRadius: 4 }}
                         >
-                            {/* ⭐️ THAY THẾ: Dùng MedicineSearchSelect thay cho Ant Design Select */}
                             <Form.Item
                                 name="medicineId"
                                 label="Thuốc"
