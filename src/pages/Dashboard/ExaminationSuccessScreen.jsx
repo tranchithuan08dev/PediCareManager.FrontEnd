@@ -212,6 +212,11 @@ const ExaminationSuccessScreen = ({ payload, totalAmount, medicationDays }) => {
                             <Col span={24}>
                                 <Text><strong>Địa chỉ:</strong> {patient.address || 'Không có thông tin'}</Text>
                             </Col>
+                            {record.weightKg && (
+                                <Col span={24}>
+                                    <Text><strong>Cân nặng:</strong> {record.weightKg} kg</Text>
+                                </Col>
+                            )}
                             {record.drugAllergy && (
                                 <Col span={24}>
                                     <Text style={{ color: '#cf1322' }}><strong>⚠ Tiền sử:</strong> {record.drugAllergy}</Text>
