@@ -59,7 +59,20 @@ export const fetchGetListPatientSearch = createAsyncThunk(`${name}/fetchGetListP
     }
 });
 
+export const fecthUpdatePatient = createAsyncThunk(
+    `${name}/fecthUpdatePatient`, 
+    async (payload, thunkAPI) => {
+        try {
+            console.log("payload thô nhận được:", payload); 
 
+            const { id, ...data } = payload;
+            const res = await patientService.udaptePatient(id, data);        
+            return res;
+        } catch (error) {
+            return { ok: false, message: 'Lỗi xảy ra' }
+        }
+    }
+);
 
 const patientSlice = createSlice({
     name,

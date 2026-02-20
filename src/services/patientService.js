@@ -1,8 +1,12 @@
+import { data } from 'react-router-dom';
 import API from './api';
 
 const patientService = {
     getAll: function () {
         return API.callWithToken().get('Patients');
+    },
+    udaptePatient: function (id,data){
+       return API.callWithToken().put(`Patients/${id}`,data);
     },
     getDetail:function (id) {
         return API.callWithToken().get(`Patients/${id}`);
