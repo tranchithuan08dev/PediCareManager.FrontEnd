@@ -242,8 +242,8 @@ const calculateAge = (dob) => {
 };
 
 // ✅ ĐÃ SỬA: Nhận thêm tham số `unit` để hiển thị đúng đơn vị (viên, gói, ...)
-const formatUsageInstruction = (dosage, note, unit = 'viên') => {
-    const u = unit?.trim() || 'viên';
+const formatUsageInstruction = (dosage, note, unit) => {
+    const u = unit?.trim() ;
     const parts = [];
     if (dosage.morning > 0) parts.push(`Sáng: ${dosage.morning} ${u}`);
     if (dosage.noon > 0) parts.push(`Trưa: ${dosage.noon} ${u}`);
