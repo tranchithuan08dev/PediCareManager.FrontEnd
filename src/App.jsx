@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
-import ProcessExaminationPage from './pages/Dashboard/ProcessExaminationPageBK'
+import ProcessExaminationPage from './pages/Dashboard/ProcessExaminationPageBK_v1'
 import DoctorDashboardLayout from './pages/Dashboard'
 import ForgetPasswordPage from './pages/ForgetPasswordPage'
 import MedicineManagement from './pages/Dashboard/MedicineManagement'
