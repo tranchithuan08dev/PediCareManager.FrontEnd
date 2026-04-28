@@ -13,6 +13,7 @@
     "@ant-design/icons": "^6.1.0",
     "@reduxjs/toolkit": "^2.9.2",
     "antd": "^5.27.6",
+    "antd-mask-input": "^2.0.7",
     "axios": "^1.13.0",
     "chart.js": "^4.5.1",
     "dayjs": "^1.11.19",
