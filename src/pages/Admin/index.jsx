@@ -23,6 +23,7 @@ import {
   SolutionOutlined,
   PlusCircleOutlined,
   LogoutOutlined,
+  LineChartOutlined,
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
@@ -52,6 +53,12 @@ const menuItems = [
     icon: <BarChartOutlined />,
     label: 'Báo cáo Doanh thu',
     path: '/admin/reports',
+  },
+  {
+    key: 'daily-reports',
+    icon: <LineChartOutlined />,
+    label: 'Biểu đồ khám bệnh',
+    path: '/admin/daily-visit-chart',
   },
   {
     key: 'create-medicine',
